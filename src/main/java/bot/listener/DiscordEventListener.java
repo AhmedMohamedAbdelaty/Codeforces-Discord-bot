@@ -3,7 +3,6 @@ package bot.listener;
 import bot.CodeforcesBot;
 import bot.commands.Command;
 import bot.commands.CommandFactory;
-import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.events.session.ReadyEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
@@ -26,12 +25,27 @@ public class DiscordEventListener extends ListenerAdapter {
         registerCommands(bot.getShardManager());
     }
 
-    private void registerCommands(ShardManager jda) {
-        Guild g = jda.getGuildById("423085629807788032");
-        if (g != null) {
-            CommandListUpdateAction commands = g.updateCommands();
-            CommandFactory.registerCommands(commands);
-        }
+    private void registerCommands(ShardManager shardManager) {
+//        // Register guild-specific commands
+//        Guild g = shardManager.getGuildById("423085629807788032");
+//        if (g != null) {
+//            CommandListUpdateAction guildCommands = g.updateCommands();
+//            CommandFactory.registerCommands(guildCommands);
+//            guildCommands.queue(
+//                    success -> logger.info("Guild-specific commands registered successfully for guild {}", g.getId()),
+//                    error -> logger.error("Error registering guild-specific commands for guild {}", g.getId(), error)
+//            );
+//        }
+
+        // Register global commands
+        shardManager.getShards().forEach(jda -> {
+            CommandListUpdateAction globalCommands = jda.updateCommands();
+            CommandFactory.registerCommands(globalCommands);
+            globalCommands.queue(
+                    success -> logger.info("Global commands registered successfully for shard {}", jda.getShardInfo().getShardId()),
+                    error -> logger.error("Error registering global commands for shard {}", jda.getShardInfo().getShardId(), error)
+            );
+        });
     }
 
     @Override

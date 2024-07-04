@@ -36,13 +36,13 @@ public class CommandFactory {
 
     public static void registerCommands(CommandListUpdateAction commands) {
         commands.addCommands(
-                Commands.slash("userinfo", "Hello")
-                        .addOption(STRING, "username", "username", true),
-                Commands.slash("upcomingcontests", "Gets upcoming contests"),
-                Commands.slash("finishedcontests", "Gets finished contests"),
-                Commands.slash("standing", "Gets standing of a contest for a user")
-                        .addOption(STRING, "username", "username", true)
-                        .addOption(STRING, "contest_id", "contestId", true)
+                Commands.slash("userinfo", "Get user information")
+                        .addOption(STRING, "username", "Codeforces username", true),
+                Commands.slash("upcomingcontests", "Get upcoming contests"),
+                Commands.slash("finishedcontests", "Get finished contests"),
+                Commands.slash("standing", "Get standing of a contest for a user")
+                        .addOption(STRING, "username", "Codeforces username", true)
+                        .addOption(STRING, "contest_id", "Contest ID", true)
         ).queue();
     }
 }
