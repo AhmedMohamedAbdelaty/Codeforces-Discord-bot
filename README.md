@@ -14,8 +14,7 @@ contests, user standings, and more directly through Discord commands.
 
 ## How to Use
 
-1. **Invite the Bot**: Use the provided invitation link to add the bot to your Discord server.
-2. **Commands**:
+1. **Commands**:
     - `/userinfo username:<username>`: Get information about a Codeforces user.
     - `/upcomingcontests`: List upcoming Codeforces contests.
     - `/finishedcontests`: List recently finished Codeforces contests.
