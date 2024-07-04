@@ -13,8 +13,10 @@ contests, user standings, and more directly through Discord commands.
 - **Health Check**: A simple HTTP server for health checks.
 
 ## How to Use
-
-1. **Commands**:
+1. **Invite the Bot**:
+    - Click [here](https://discord.com/api/oauth2/authorize?client_id=1257793557838692473&permissions=0&scope=bot%20applications.commands) to invite the bot to your server.
+    - The bot is currently hosted on a free Koyeb instance, so it may not be available all the time.
+2. **Commands**:
     - `/userinfo username:<username>`: Get information about a Codeforces user.
     - `/upcomingcontests`: List upcoming Codeforces contests.
     - `/finishedcontests`: List recently finished Codeforces contests.
