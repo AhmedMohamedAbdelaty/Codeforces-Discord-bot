@@ -5,6 +5,7 @@ import bot.commands.Command;
 import bot.infrastructure.CodeforcesAPIImpl;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.interactions.InteractionHook;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.concurrent.CompletableFuture;
 
@@ -16,7 +17,7 @@ public class UpcomingContestsCommand implements Command {
     }
 
     @Override
-    public void execute(SlashCommandInteractionEvent event) {
+    public void execute(@NotNull SlashCommandInteractionEvent event) {
         // Defer the reply to avoid the 3-second timeout
         event.deferReply().queue();
 

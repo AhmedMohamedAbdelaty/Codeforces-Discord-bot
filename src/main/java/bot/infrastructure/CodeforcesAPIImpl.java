@@ -178,7 +178,7 @@ public class CodeforcesAPIImpl implements CodeforcesAPI {
         ApiResponse<StandingsResponse> apiResponse = gson.fromJson(jsonResponse, responseType);
 
         if ("OK".equals(apiResponse.getStatus()) && apiResponse.getResult() != null && !apiResponse.getResult().getRows().isEmpty()) {
-            StandingsResponse.StandingsRow userStanding = apiResponse.getResult().getRows().get(0);
+            StandingsResponse.StandingsRow userStanding = apiResponse.getResult().getRows().getFirst();
 
             String contestName = apiResponse.getResult().getContest().getName();
             String contestStartTime = new java.text.SimpleDateFormat("dd/MM/yyyy HH:mm:ss")

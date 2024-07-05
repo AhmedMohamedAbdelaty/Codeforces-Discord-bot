@@ -3,6 +3,7 @@ package bot.util;
 import bot.domain.user.Rating;
 import net.dv8tion.jda.api.EmbedBuilder;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.ChartUtils;
 import org.jfree.chart.JFreeChart;
@@ -19,6 +20,7 @@ import java.util.List;
 
 public class EmbedBuilderUtil {
 
+    @NotNull
     public static EmbedBuilder createDefaultEmbed() {
         EmbedBuilder embed = new EmbedBuilder();
         embed.setColor(Color.BLUE); // Set a default color for all embeds
@@ -26,6 +28,7 @@ public class EmbedBuilderUtil {
         return embed;
     }
 
+    @NotNull
     public static EmbedBuilder createErrorEmbed(String errorMessage) {
         EmbedBuilder embed = createDefaultEmbed();
         embed.setColor(Color.RED); // Error messages can be red
@@ -33,7 +36,8 @@ public class EmbedBuilderUtil {
         return embed;
     }
 
-    public static String generateGraphImage(List<Rating> ratingHistory, String handle) {
+    @Nullable
+    public static String generateGraphImage(@NotNull List<Rating> ratingHistory, String handle) {
         TimeSeries series = new TimeSeries("Rating");
 
         for (Rating change : ratingHistory) {

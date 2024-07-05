@@ -5,6 +5,7 @@ import bot.commands.Command;
 import bot.infrastructure.CodeforcesAPIImpl;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.interactions.InteractionHook;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
@@ -17,7 +18,7 @@ public class StandingCommand implements Command {
     }
 
     @Override
-    public void execute(SlashCommandInteractionEvent event) {
+    public void execute(@NotNull SlashCommandInteractionEvent event) {
         String username = Objects.requireNonNull(event.getOption("username")).getAsString();
         int contestId = Objects.requireNonNull(event.getOption("contest_id")).getAsInt();
 

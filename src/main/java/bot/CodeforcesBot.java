@@ -3,6 +3,7 @@ package bot;
 import bot.listener.DiscordEventListener;
 import net.dv8tion.jda.api.sharding.DefaultShardManagerBuilder;
 import net.dv8tion.jda.api.sharding.ShardManager;
+import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -22,6 +23,7 @@ public class CodeforcesBot {
         }
     }
 
+    @NotNull
     private ShardManager buildShardManager(String token) throws LoginException {
         DefaultShardManagerBuilder builder = DefaultShardManagerBuilder.createDefault(token)
                 .addEventListeners(new DiscordEventListener(this));
