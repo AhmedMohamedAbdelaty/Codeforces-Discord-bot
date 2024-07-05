@@ -81,6 +81,12 @@
             <version>20070405</version>
         </dependency>
 
+        <!-- https://mvnrepository.com/artifact/org.jfree/jfreechart -->
+        <dependency>
+            <groupId>org.jfree</groupId>
+            <artifactId>jfreechart</artifactId>
+            <version>1.5.5</version>
+        </dependency>
 
 
     </dependencies>

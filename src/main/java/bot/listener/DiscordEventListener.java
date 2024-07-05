@@ -12,6 +12,8 @@ import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.Objects;
+
 public class DiscordEventListener extends ListenerAdapter {
     private static final Logger logger = LoggerFactory.getLogger(DiscordEventListener.class);
     private final CodeforcesBot bot;
@@ -22,6 +24,7 @@ public class DiscordEventListener extends ListenerAdapter {
 
     @Override
     public void onReady(@NotNull ReadyEvent event) {
+//        resetGuildCommands(Objects.requireNonNull(event.getJDA().getShardManager()), "423085629807788032");
         registerCommands(bot.getShardManager());
     }
 
@@ -56,5 +59,9 @@ public class DiscordEventListener extends ListenerAdapter {
         } else {
             event.reply("Unknown command").queue();
         }
+    }
+
+    public void resetGuildCommands(@NotNull ShardManager shardManager, String guildId) {
+        Objects.requireNonNull(shardManager.getGuildById(guildId)).updateCommands().queue();
     }
 }

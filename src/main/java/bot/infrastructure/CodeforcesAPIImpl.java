@@ -6,6 +6,7 @@ import bot.api.CodeforcesAPI;
 import bot.domain.contest.Contest;
 import bot.domain.contest.Problem;
 import bot.domain.contest.StandingsResponse;
+import bot.domain.user.Rating;
 import bot.domain.user.UserInfo;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
@@ -219,6 +220,21 @@ public class CodeforcesAPIImpl implements CodeforcesAPI {
             return embed;
         } else {
             throw new IOException("Failed to retrieve user standings");
+        }
+    }
+
+    @Override
+    public List<Rating> getRatingHistory(String handle) throws IOException {
+        String url = BASE_URL + "user.rating" + "?handle=" + handle;
+        String jsonResponse = apiCaller.makeApiCall(url);
+        Type responseType = new TypeToken<ApiResponse<List<Rating>>>() {
+        }.getType();
+        ApiResponse<List<Rating>> apiResponse = gson.fromJson(jsonResponse, responseType);
+
+        if ("OK".equals(apiResponse.getStatus()) && apiResponse.getResult() != null) {
+            return apiResponse.getResult();
+        } else {
+            throw new IOException("Failed to retrieve rating history");
         }
     }
 

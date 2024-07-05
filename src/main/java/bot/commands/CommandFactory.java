@@ -3,9 +3,11 @@ package bot.commands;
 import bot.commands.contestCommands.FinishedContestsCommand;
 import bot.commands.contestCommands.StandingCommand;
 import bot.commands.contestCommands.UpcomingContestsCommand;
+import bot.commands.userCommands.RatingHistoryCommand;
 import bot.commands.userCommands.UserInfoCommand;
 import net.dv8tion.jda.api.interactions.commands.build.Commands;
 import net.dv8tion.jda.api.requests.restaction.CommandListUpdateAction;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -18,12 +20,19 @@ public class CommandFactory {
     static {
         // get user info
         register("userinfo", new UserInfoCommand());
+
         // get upcoming contests
-        register("upcomingcontests", new UpcomingContestsCommand());
+        register("upcoming-contests", new UpcomingContestsCommand());
+
         // get finished contests
-        register("finishedcontests", new FinishedContestsCommand());
+        register("finished-contests", new FinishedContestsCommand());
+
         // return standing of a contest for a user
         register("standing", new StandingCommand());
+
+        // rating history, graph.
+        register("rating-history", new RatingHistoryCommand());
+
     }
 
     public static void register(String name, Command command) {
@@ -34,15 +43,21 @@ public class CommandFactory {
         return commands.get(name);
     }
 
-    public static void registerCommands(CommandListUpdateAction commands) {
+    public static void registerCommands(@NotNull CommandListUpdateAction commands) {
         commands.addCommands(
                 Commands.slash("userinfo", "Get user information")
                         .addOption(STRING, "username", "Codeforces username", true),
-                Commands.slash("upcomingcontests", "Get upcoming contests"),
-                Commands.slash("finishedcontests", "Get finished contests"),
+
+                Commands.slash("upcoming-contests", "Get upcoming contests"),
+
+                Commands.slash("finished-contests", "Get finished contests"),
+
                 Commands.slash("standing", "Get standing of a contest for a user")
                         .addOption(STRING, "username", "Codeforces username", true)
-                        .addOption(STRING, "contest_id", "Contest ID", true)
+                        .addOption(STRING, "contest_id", "Contest ID", true),
+
+                Commands.slash("rating-history", "Get rating history of a user")
+                        .addOption(STRING, "username", "Codeforces username", true)
         ).queue();
     }
 }
