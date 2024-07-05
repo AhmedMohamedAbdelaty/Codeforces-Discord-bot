@@ -25,10 +25,22 @@ public class DiscordEventListener extends ListenerAdapter {
     @Override
     public void onReady(@NotNull ReadyEvent event) {
 //        resetGuildCommands(Objects.requireNonNull(event.getJDA().getShardManager()), "423085629807788032");
+//        registerGuildsCommands(bot.getShardManager());
         registerCommands(bot.getShardManager());
     }
 
-    private void registerCommands(ShardManager shardManager) {
+    private void registerGuildsCommands(@NotNull ShardManager shardManager) {
+        shardManager.getGuilds().forEach(guild -> {
+            CommandListUpdateAction guildCommands = guild.updateCommands();
+            CommandFactory.registerCommands(guildCommands);
+            guildCommands.queue(
+                    success -> logger.info("Guild-specific commands registered successfully for guild {}", guild.getId()),
+                    error -> logger.error("Error registering guild-specific commands for guild {}", guild.getId(), error)
+            );
+        });
+    }
+
+    private void registerCommands(@NotNull ShardManager shardManager) {
 //        // Register guild-specific commands
 //        Guild g = shardManager.getGuildById("423085629807788032");
 //        if (g != null) {

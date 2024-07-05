@@ -5,12 +5,15 @@ import bot.api.ApiResponse;
 import bot.api.CodeforcesAPI;
 import bot.domain.contest.Contest;
 import bot.domain.contest.Problem;
+import bot.domain.contest.ProblemSetResult;
 import bot.domain.contest.StandingsResponse;
 import bot.domain.user.Rating;
 import bot.domain.user.UserInfo;
+import bot.util.EmbedBuilderUtil;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import net.dv8tion.jda.api.EmbedBuilder;
+import org.jetbrains.annotations.NotNull;
 
 import java.awt.*;
 import java.io.IOException;
@@ -18,6 +21,8 @@ import java.lang.reflect.Type;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
+
 
 public class CodeforcesAPIImpl implements CodeforcesAPI {
     private static final String BASE_URL = "https://codeforces.com/api/";
@@ -238,4 +243,31 @@ public class CodeforcesAPIImpl implements CodeforcesAPI {
         }
     }
 
+    @Override
+    public EmbedBuilder getRandomProblem(@NotNull List<String> tagsList, int rateStart, int rateEnd) throws IOException {
+        String url = BASE_URL + "problemset.problems";
+        if (!tagsList.isEmpty()) {
+            url += "?tags=" + String.join(";", tagsList);
+        }
+        String jsonResponse = apiCaller.makeApiCall(url);
+
+        Type responseType = new TypeToken<ApiResponse<ProblemSetResult>>() {
+        }.getType();
+        ApiResponse<ProblemSetResult> apiResponse = gson.fromJson(jsonResponse, responseType);
+
+        if ("OK".equals(apiResponse.getStatus()) && apiResponse.getResult() != null) {
+            List<Problem> problems = apiResponse.getResult().getProblems();
+            List<Problem> filteredProblems = problems.stream()
+                    .filter(problem -> problem.getRating() >= rateStart && problem.getRating() <= rateEnd)
+                    .toList();
+            if (filteredProblems.isEmpty()) {
+                throw new IOException("No problem found in the given rating range");
+            }
+            Random random = new Random();
+            Problem randomProblem = filteredProblems.get(random.nextInt(filteredProblems.size()));
+            return EmbedBuilderUtil.buildRandomProblemEmbed(randomProblem);
+        } else {
+            throw new IOException("Failed to retrieve random problem");
+        }
+    }
 }

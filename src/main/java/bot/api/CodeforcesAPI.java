@@ -22,4 +22,7 @@ public interface CodeforcesAPI {
 
     // Get rating history of a user as a graph
     List<Rating> getRatingHistory(String handle) throws IOException;
+
+    // Get a random problem
+    EmbedBuilder getRandomProblem(List<String> tagsList, int rateStart, int rateEnd) throws IOException;
 }

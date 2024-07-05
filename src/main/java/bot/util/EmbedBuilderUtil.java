@@ -1,5 +1,6 @@
 package bot.util;
 
+import bot.domain.contest.Problem;
 import bot.domain.user.Rating;
 import net.dv8tion.jda.api.EmbedBuilder;
 import org.jetbrains.annotations.NotNull;
@@ -92,6 +93,23 @@ public class EmbedBuilderUtil {
         if (filePath != null) {
             embed.setImage("attachment://" + new File(filePath).getName());
         }
+
+        return embed;
+    }
+
+    @NotNull
+    public static EmbedBuilder buildRandomProblemEmbed(@NotNull Problem randomProblem) {
+        EmbedBuilder embed = new EmbedBuilder();
+
+        String problemNameWithIndex = randomProblem.getIndex() + ". " + randomProblem.getName();
+        String problemLink = "https://codeforces.com/contest/" + randomProblem.getContestId() + "/problem/" + randomProblem.getIndex();
+        int problemRating = randomProblem.getRating();
+        List<String> tags = randomProblem.getTags();
+
+        embed.setTitle(problemNameWithIndex, problemLink);
+        embed.setColor(Color.GREEN);
+        embed.addField("Rating", String.valueOf(problemRating), true);
+        embed.addField("Tags", String.join(", ", tags), false);
 
         return embed;
     }

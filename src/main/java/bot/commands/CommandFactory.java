@@ -3,6 +3,7 @@ package bot.commands;
 import bot.commands.contestCommands.FinishedContestsCommand;
 import bot.commands.contestCommands.StandingCommand;
 import bot.commands.contestCommands.UpcomingContestsCommand;
+import bot.commands.problemCommands.RandomProblemCommand;
 import bot.commands.userCommands.RatingHistoryCommand;
 import bot.commands.userCommands.UserInfoCommand;
 import net.dv8tion.jda.api.interactions.commands.build.Commands;
@@ -33,6 +34,9 @@ public class CommandFactory {
         // rating history, graph.
         register("rating-history", new RatingHistoryCommand());
 
+        // random problem
+        register("random-problem", new RandomProblemCommand());
+
     }
 
     public static void register(String name, Command command) {
@@ -57,7 +61,12 @@ public class CommandFactory {
                         .addOption(STRING, "contest_id", "Contest ID", true),
 
                 Commands.slash("rating-history", "Get rating history of a user")
-                        .addOption(STRING, "username", "Codeforces username", true)
+                        .addOption(STRING, "username", "Codeforces username", true),
+
+                Commands.slash("random-problem", "Get a random problem")
+                        .addOption(STRING, "rating_start", "Rating start", true)
+                        .addOption(STRING, "rating_end", "Rating end", true)
+                        .addOption(STRING, "tags", "Problem tags(separated by comma)", false)
         ).queue();
     }
 }
