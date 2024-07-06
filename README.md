@@ -18,15 +18,38 @@ contests, user standings, and more directly through Discord commands.
     - The bot is currently hosted on a free Koyeb instance, so it may not be available all the time.
 2. **Commands**:
     - `/userinfo username:<username>`: Get information about a Codeforces user.
-    - `/upcomingcontests`: List upcoming Codeforces contests.
-    - `/finishedcontests`: List recently finished Codeforces contests.
+    - `/upcoming-contests`: List upcoming Codeforces contests.
+    - `/finished-contests`: List recently finished Codeforces contests.
     - `/standing username:<username> contest_id:<contestId>`: Get a user's standing in a specific contest.
+    - `/random-problem ratingSart:<ratingStart> ratingEnd:<ratingEnd> [tags:<tag1,tag2,...>]`: Get a random problem from Codeforces, given rating and tags.
+    - `/rating-history username:<username>`: Get the rating history graph of a user.
 
 ## Screenshots
 
-https://github.com/AhmedMohamedAbdelaty/Codeforces-Discord-bot/assets/73834838/9968dd27-21aa-4475-a67c-d22713c815e3
+1. **Random Problem**:
 
-*Interacting with the bot in a Discord server.*
+
+https://github.com/AhmedMohamedAbdelaty/Codeforces-Discord-bot/assets/73834838/550f070c-ec15-4c89-a7e4-efcd4bf00933
+
+2. **User Information**:
+
+
+https://github.com/AhmedMohamedAbdelaty/Codeforces-Discord-bot/assets/73834838/5aa37744-2aa0-4c7a-81f2-203d5996db62
+
+3. **Rating History**:
+
+
+https://github.com/AhmedMohamedAbdelaty/Codeforces-Discord-bot/assets/73834838/a38da1d5-7618-4cb7-a139-d3d969058606
+
+4. **Upcoming and Finished Contests**:
+
+
+https://github.com/AhmedMohamedAbdelaty/Codeforces-Discord-bot/assets/73834838/e5a56165-4d59-409e-b666-0fe53080bff2
+
+5. **User Contest Standings**:
+
+
+https://github.com/AhmedMohamedAbdelaty/Codeforces-Discord-bot/assets/73834838/98cdc743-214a-430b-bcef-21448ecc36d7
 
 ## Setup
 
@@ -62,12 +85,12 @@ Contributions are welcome! Please feel free to submit a pull request.
 - [x] Return finished contests
 - [x] Return user info
 - [x] Return standing of a contest for a user
+- [x] Return random problem
+    - [x] Rating range (required)
+    - [x] Tags (optional)
+- [x] Return rating history graph of a user
 - [ ] Return submissions of a contest for a user
-- [ ] Return random problem
-    - [ ] Tag as optional
-    - [ ] Rating as optional
 - [ ] last Submissions of a user
-- [ ] Return rating history of a user (given count, eg. last 5 contests)
 - [ ] Given some usernames, return a contest that none of them participated in
     - [ ] Contest type as optional (Div3, so on)
     - [ ] Gym as optional
