@@ -72,9 +72,6 @@ docker build -t codeforces-bot .
 docker run -d -p 8000:8000 codeforces-bot -t <your_bot_token>
 ```
 
-> [!Note]
-> Make sure to replace the guild ID in DiscordEventListener.java with your own.
-
 ## Contributing
 
 Contributions are welcome! Please feel free to submit a pull request.
