@@ -1,5 +1,6 @@
 package bot.util;
 
+import bot.domain.contest.Contest;
 import bot.domain.contest.Problem;
 import bot.domain.user.Rating;
 import net.dv8tion.jda.api.EmbedBuilder;
@@ -15,9 +16,12 @@ import org.jfree.data.time.TimeSeriesCollection;
 import java.awt.*;
 import java.io.File;
 import java.io.IOException;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class EmbedBuilderUtil {
 
@@ -110,6 +114,41 @@ public class EmbedBuilderUtil {
         embed.setColor(Color.GREEN);
         embed.addField("Rating", String.valueOf(problemRating), true);
         embed.addField("Tags", String.join(", ", tags), false);
+
+        return embed;
+    }
+
+    @NotNull
+    public static EmbedBuilder buildRandomContestEmbed(@NotNull Contest selectedContest, List<String> usernames, ZonedDateTime userTime) {
+        EmbedBuilder embed = new EmbedBuilder();
+        String contestUrl = "https://codeforces.com/contest/" + selectedContest.getId();
+        embed.setTitle("🎉 Contest: " + selectedContest.getName(), contestUrl);
+        embed.setColor(Color.GREEN);
+        embed.setDescription("Join this contest as a fun tournament!");
+
+        // Add contest details
+        embed.addField("Type", selectedContest.getType(), true);
+
+        // Custom start time (user input)
+        DateTimeFormatter friendlyFormatter = DateTimeFormatter.ofPattern("MMMM d, yyyy, h:mm a z");
+        String formattedCustomStartTime = userTime.format(friendlyFormatter);
+        embed.addField("Virtual Start Time", formattedCustomStartTime, true);
+
+        // Format duration
+        long hours = selectedContest.getDurationSeconds() / 3600;
+        long minutes = (selectedContest.getDurationSeconds() % 3600) / 60;
+        String duration = String.format("%d hours %d minutes", hours, minutes);
+        embed.addField("Duration", duration, false);
+
+
+        // Add participating users
+        List<String> participantsList = usernames.stream()
+                .map(username -> "[`" + username + "`](https://codeforces.com/profile/" + username + ")")
+                .collect(Collectors.toList());
+        String participants = String.join(", ", participantsList);
+        embed.addField("Participants", participants, false);
+
+        embed.setFooter("Let's see who will be rank one!");
 
         return embed;
     }

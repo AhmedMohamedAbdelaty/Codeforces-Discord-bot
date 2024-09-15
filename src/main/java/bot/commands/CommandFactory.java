@@ -1,6 +1,7 @@
 package bot.commands;
 
 import bot.commands.contestCommands.FinishedContestsCommand;
+import bot.commands.contestCommands.RandomContestCommand;
 import bot.commands.contestCommands.StandingCommand;
 import bot.commands.contestCommands.UpcomingContestsCommand;
 import bot.commands.problemCommands.RandomProblemCommand;
@@ -37,6 +38,8 @@ public class CommandFactory {
         // random problem
         register("random-problem", new RandomProblemCommand());
 
+        // return random contest, none of the given usernames have participated in
+        register("random-contest", new RandomContestCommand());
     }
 
     public static void register(String name, Command command) {
@@ -66,7 +69,12 @@ public class CommandFactory {
                 Commands.slash("random-problem", "Get a random problem")
                         .addOption(STRING, "rating_start", "Rating start", true)
                         .addOption(STRING, "rating_end", "Rating end", true)
-                        .addOption(STRING, "tags", "Problem tags(separated by comma)", false)
+                        .addOption(STRING, "tags", "Problem tags(separated by comma)", false),
+
+                Commands.slash("random-contest", "Get a random contest")
+                        .addOption(STRING, "usernames", "Usernames(separated by comma)", true)
+                        .addOption(STRING, "contest_type", "Contest type (\"div1\", \"div2\", \"div3\", \"div4\")", true)
+                        .addOption(STRING, "start_time", "Start time (24 hour format) (e.g., 2023-10-01 15:00:00 +03:00)", true)
         ).queue();
     }
 }
