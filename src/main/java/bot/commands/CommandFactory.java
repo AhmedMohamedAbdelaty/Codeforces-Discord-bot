@@ -8,6 +8,7 @@ import bot.commands.contestCommands.FinishedContestsCommand;
 import bot.commands.contestCommands.StandingCommand;
 import bot.commands.contestCommands.UpcomingContestsCommand;
 import bot.commands.problemCommands.RandomProblemCommand;
+import bot.commands.userCommands.ProblemRatingsCommand;
 import bot.commands.userCommands.RatingHistoryCommand;
 import bot.commands.userCommands.UserInfoCommand;
 import net.dv8tion.jda.api.interactions.commands.build.Commands;
@@ -37,6 +38,9 @@ public class CommandFactory {
 
         // random problem
         register("random-problem", new RandomProblemCommand());
+
+        // problem ratings
+        register("problem-ratings", new ProblemRatingsCommand());
 
         // compare problem ratings
          register("compare-problem-ratings", new CompareProblemRatingsCommand());
@@ -70,6 +74,9 @@ public class CommandFactory {
                         .addOption(STRING, "rating_start", "Rating start", true)
                         .addOption(STRING, "rating_end", "Rating end", true)
                         .addOption(STRING, "tags", "Problem tags(separated by comma)", false),
+
+                Commands.slash("problem-ratings", "Get problem ratings of a user")
+                        .addOption(STRING, "username", "Codeforces username", true),
 
                 Commands.slash("compare-problem-ratings", "Compare problem ratings")
                         .addOption(STRING, "username1", "Codeforces username 1", true)
