@@ -6,14 +6,9 @@ import org.slf4j.LoggerFactory;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPool;
 import redis.clients.jedis.JedisPoolConfig;
-// import redis.clients.jedis.Protocol;
 
 public class RedisCache {
     private static final Logger logger = LoggerFactory.getLogger(RedisCache.class);
-
-    // private static final JedisPool pool = new JedisPool(new JedisPoolConfig(), System.getenv("redis_host"),
-    //         Integer.parseInt(System.getenv("redis_port")), Protocol.DEFAULT_TIMEOUT, System.getenv("redis_pass"));
-
     private static RedisCache instance;
     private static JedisPool pool;
 
