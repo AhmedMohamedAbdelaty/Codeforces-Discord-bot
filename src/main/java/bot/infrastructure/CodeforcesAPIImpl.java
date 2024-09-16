@@ -18,6 +18,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.awt.*;
 import java.io.IOException;
+import java.io.Serializable;
 import java.lang.reflect.Type;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -28,7 +29,7 @@ public class CodeforcesAPIImpl implements CodeforcesAPI {
     private static final String BASE_URL = "https://codeforces.com/api/";
     private static final Gson gson = new Gson();
     private final ApiCaller apiCaller;
-    RedisUtil redisUtil = new RedisUtil();
+    private final RedisUtil redisUtil = new RedisUtil();
 
     public CodeforcesAPIImpl(ApiCaller apiCaller) {
         this.apiCaller = apiCaller;
@@ -36,7 +37,7 @@ public class CodeforcesAPIImpl implements CodeforcesAPI {
 
     @Override
     public EmbedBuilder getUserInfo(String handle) throws IOException {
-        String cacheKey = "user_info:" + handle; // Unique cache key
+        String cacheKey = "user_info:" + handle;
 
         // Check Redis Cache
         UserInfo cachedUserInfo = redisUtil.getObjectFromRedis(cacheKey, UserInfo.class);
@@ -45,7 +46,7 @@ public class CodeforcesAPIImpl implements CodeforcesAPI {
         }
 
         // If not cached, fetch from the API
-        String url = BASE_URL + "user.info" + "?handles=" + handle;
+        String url = BASE_URL + "user.info?handles=" + handle;
         String jsonResponse = apiCaller.makeApiCall(url);
         Type responseType = new TypeToken<ApiResponse<List<UserInfo>>>() {}.getType();
         ApiResponse<List<UserInfo>> apiResponse = gson.fromJson(jsonResponse, responseType);
@@ -62,7 +63,7 @@ public class CodeforcesAPIImpl implements CodeforcesAPI {
         }
     }
 
-    private List<Contest> getContests(String url) throws IOException {
+    public List<Contest> getContests(String url) throws IOException {
         String jsonResponse = apiCaller.makeApiCall(url);
         Type responseType = new TypeToken<ApiResponse<List<Contest>>>() {}.getType();
         ApiResponse<List<Contest>> apiResponse = gson.fromJson(jsonResponse, responseType);
@@ -85,7 +86,7 @@ public class CodeforcesAPIImpl implements CodeforcesAPI {
         }
 
         // Fetch from the API if not cached
-        String url = BASE_URL + "contest.list" + "?gym=false";
+        String url = BASE_URL + "contest.list?gym=false";
         List<Contest> contests = getContests(url);
 
         // Cache the result
@@ -94,8 +95,7 @@ public class CodeforcesAPIImpl implements CodeforcesAPI {
         return buildContestsEmbed(contests, "Upcoming Contests", Color.ORANGE, "BEFORE");
     }
 
-    // Helper method to build EmbedBuilder for contests
-    private EmbedBuilder buildContestsEmbed(List<Contest> contests, String title, Color color, String phaseFilter) {
+    public EmbedBuilder buildContestsEmbed(List<Contest> contests, String title, Color color, String phaseFilter) {
         EmbedBuilder embed = new EmbedBuilder();
         embed.setTitle(title);
         embed.setColor(color);
@@ -106,7 +106,7 @@ public class CodeforcesAPIImpl implements CodeforcesAPI {
                 String name = contest.getName();
                 String contestId = String.valueOf(contest.getId());
                 String startTime = new java.text.SimpleDateFormat("dd/MM/yyyy HH:mm:ss").format(new java.util.Date(contest.getStartTimeSeconds() * 1000));
-                String duration = String.valueOf(contest.getDurationSeconds() / 3600) + " hours";
+                String duration = contest.getDurationSeconds() / 3600 + " hours";
 
                 long relativeTimeSeconds = contest.getRelativeTimeSeconds();
                 String relativeTime;
@@ -118,7 +118,7 @@ public class CodeforcesAPIImpl implements CodeforcesAPI {
                     long minutes = (absTimeSeconds % 3600) / 60;
                     relativeTime = String.format("Before start %d days %d hours %d minutes", days, hours, minutes);
                 } else {
-                    relativeTime = String.valueOf(relativeTimeSeconds / 3600) + " hours";
+                    relativeTime = relativeTimeSeconds / 3600 + " hours";
                 }
 
                 embed.addField(name + " (ID: " + contestId + ")", "Start Time: " + startTime + "\nDuration: " + duration + "\n" + relativeTime, false);
@@ -127,14 +127,11 @@ public class CodeforcesAPIImpl implements CodeforcesAPI {
                 if (count == 5) {
                     break;
                 }
-            } else {
-                break;
             }
         }
         return embed;
     }
 
-    // Return last 5 finished contests
     @Override
     public EmbedBuilder getFinishedContests() throws IOException {
         String cacheKey = "finished_contests";
@@ -146,7 +143,7 @@ public class CodeforcesAPIImpl implements CodeforcesAPI {
         }
 
         // Fetch from the API if not cached
-        String url = BASE_URL + "contest.list" + "?gym=false";
+        String url = BASE_URL + "contest.list?gym=false";
         List<Contest> contests = getContests(url);
 
         // Cache the result
@@ -201,7 +198,7 @@ public class CodeforcesAPIImpl implements CodeforcesAPI {
 
             EmbedBuilder embed = new EmbedBuilder();
             embed.setTitle("`" + handle + "`" + "'s Standing in Contest");
-            embed.setColor(Color.cyan);
+            embed.setColor(Color.CYAN);
 
             String contestUrl = "https://codeforces.com/contest/" + contestId;
             String contestFieldTitle = "Contest";
@@ -248,7 +245,7 @@ public class CodeforcesAPIImpl implements CodeforcesAPI {
         }
 
         // Fetch from the API if not cached
-        String url = BASE_URL + "user.rating" + "?handle=" + handle;
+        String url = BASE_URL + "user.rating?handle=" + handle;
         String jsonResponse = apiCaller.makeApiCall(url);
         Type responseType = new TypeToken<ApiResponse<List<Rating>>>() {}.getType();
         ApiResponse<List<Rating>> apiResponse = gson.fromJson(jsonResponse, responseType);
