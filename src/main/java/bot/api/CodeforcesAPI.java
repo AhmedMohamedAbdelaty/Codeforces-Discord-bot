@@ -1,11 +1,11 @@
 package bot.api;
 
+import java.io.IOException;
+import java.util.List;
+import java.util.Map;
 
 import bot.domain.user.Rating;
 import net.dv8tion.jda.api.EmbedBuilder;
-
-import java.io.IOException;
-import java.util.List;
 
 public interface CodeforcesAPI {
     // Get user information
@@ -25,4 +25,9 @@ public interface CodeforcesAPI {
 
     // Get a random problem
     EmbedBuilder getRandomProblem(List<String> tagsList, int rateStart, int rateEnd) throws IOException;
+
+    /**
+     * @return a map of problem ratings and the number of problems solved by the user with that rating
+     */
+    Map<Integer, Integer> getProblemRatings(String handle) throws IOException;
 }

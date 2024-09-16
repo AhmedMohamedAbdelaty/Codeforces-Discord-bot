@@ -1,5 +1,13 @@
 package bot.infrastructure;
 
+import java.awt.Color;
+import java.io.IOException;
+import java.lang.reflect.Type;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Random;
+
 import bot.api.ApiCaller;
 import bot.api.ApiResponse;
 import bot.api.CodeforcesAPI;
@@ -8,20 +16,14 @@ import bot.domain.contest.Problem;
 import bot.domain.contest.ProblemSetResult;
 import bot.domain.contest.StandingsResponse;
 import bot.domain.user.Rating;
+import bot.domain.user.Submission;
 import bot.domain.user.UserInfo;
+import bot.domain.user.Verdict;
 import bot.util.EmbedBuilderUtil;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import net.dv8tion.jda.api.EmbedBuilder;
 import org.jetbrains.annotations.NotNull;
-
-import java.awt.*;
-import java.io.IOException;
-import java.lang.reflect.Type;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Random;
 
 
 public class CodeforcesAPIImpl implements CodeforcesAPI {
@@ -269,5 +271,32 @@ public class CodeforcesAPIImpl implements CodeforcesAPI {
         } else {
             throw new IOException("Failed to retrieve random problem");
         }
+    }
+
+    private List<Submission> getUserSubmissions(String handle) throws IOException {
+        String url = BASE_URL + "user.status" + "?handle=" + handle;
+        String jsonResponse = apiCaller.makeApiCall(url);
+        Type responseType = new TypeToken<ApiResponse<List<Submission>>>() {
+        }.getType();
+        ApiResponse<List<Submission>> apiResponse = gson.fromJson(jsonResponse, responseType);
+
+        if ("OK".equals(apiResponse.getStatus()) && apiResponse.getResult() != null) {
+            return apiResponse.getResult();
+        } else {
+            throw new IOException("Failed to retrieve user submissions");
+        }
+    }
+
+    @Override
+    public Map<Integer, Integer> getProblemRatings(String handle) throws IOException {
+        List<Submission> submissions = getUserSubmissions(handle);
+        Map<Integer, Integer> problemRatings = new LinkedHashMap<>();
+        for (Submission submission : submissions) {
+            if (submission.getVerdict().equals(Verdict.OK)) {
+                int rating = submission.getProblem().getRating();
+                problemRatings.put(rating, problemRatings.getOrDefault(rating, 0) + 1);
+            }
+        }
+        return problemRatings;
     }
 }
