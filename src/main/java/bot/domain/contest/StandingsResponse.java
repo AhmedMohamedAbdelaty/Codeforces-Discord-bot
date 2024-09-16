@@ -1,8 +1,10 @@
 package bot.domain.contest;
 
+import java.io.Serializable;
 import java.util.List;
 
-public class StandingsResponse {
+public class StandingsResponse implements Serializable{
+    private static final long serialVersionUID = 5L;
     private Contest contest;
     private List<Problem> problems;
     private List<StandingsRow> rows;

@@ -3,6 +3,7 @@ package bot.infrastructure;
 import bot.api.ApiCaller;
 import bot.api.ApiResponse;
 import bot.api.CodeforcesAPI;
+import bot.cache.RedisUtil;
 import bot.domain.contest.Contest;
 import bot.domain.contest.Problem;
 import bot.domain.contest.ProblemSetResult;
@@ -28,6 +29,7 @@ public class CodeforcesAPIImpl implements CodeforcesAPI {
     private static final String BASE_URL = "https://codeforces.com/api/";
     private static final Gson gson = new Gson();
     private final ApiCaller apiCaller;
+    RedisUtil redisUtil = new RedisUtil();
 
     public CodeforcesAPIImpl(ApiCaller apiCaller) {
         this.apiCaller = apiCaller;
@@ -117,6 +119,7 @@ public class CodeforcesAPIImpl implements CodeforcesAPI {
         int count = 0;
         for (Contest contest : contests) {
             if (contest.getPhase().equals("FINISHED")) {
+                redisUtil.storeObjectInRedis("contest_" + count, contest);
                 String name = contest.getName();
                 String contestId = String.valueOf(contest.getId());
                 String startTime = new java.text.SimpleDateFormat("dd/MM/yyyy HH:mm:ss").format(new java.util.Date(contest.getStartTimeSeconds() * 1000));

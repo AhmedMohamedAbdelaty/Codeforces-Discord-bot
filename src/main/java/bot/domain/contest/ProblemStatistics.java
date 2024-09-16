@@ -1,6 +1,9 @@
 package bot.domain.contest;
 
-public class ProblemStatistics {
+import java.io.Serializable;
+
+public class ProblemStatistics implements Serializable{
+    private static final long serialVersionUID = 4L;
     private int contestId;
     private String index;
     private int solvedCount;

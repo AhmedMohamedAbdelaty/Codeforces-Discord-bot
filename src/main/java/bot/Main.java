@@ -1,6 +1,10 @@
 package bot;
 
 import com.sun.net.httpserver.HttpServer;
+
+import bot.cache.RedisCache;
+import redis.clients.jedis.JedisPool;
+
 import org.apache.commons.cli.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -20,6 +24,8 @@ public class Main {
 
         CommandLineParser parser = new DefaultParser();
         HelpFormatter formatter = new HelpFormatter();
+
+        RedisCache.initializePool();
 
         try {
             CommandLine cmd = parser.parse(options, args);
