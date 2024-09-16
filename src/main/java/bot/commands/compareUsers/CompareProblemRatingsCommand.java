@@ -1,5 +1,6 @@
 package bot.commands.compareUsers;
 
+import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 
 import bot.api.CodeforcesApiCaller;
@@ -18,6 +19,9 @@ public class CompareProblemRatingsCommand implements Command {
 
     @Override
     public void execute(SlashCommandInteractionEvent event) {
+        String username1 = Objects.requireNonNull(event.getOption("username1")).getAsString();
+        String username2 = Objects.requireNonNull(event.getOption("username2")).getAsString();
+
         // Defer the reply to avoid the 3-second timeout
         event.deferReply().queue();
 
@@ -26,7 +30,7 @@ public class CompareProblemRatingsCommand implements Command {
 
         CompletableFuture.supplyAsync(() -> {
             try {
-                return codeforcesAPI.getFinishedContests();
+                return codeforcesAPI.compareProblemRatings(username1, username2);
             } catch (Exception e) {
                 throw new RuntimeException("Failed to retrieve problem ratings: " + e.getMessage(), e);
             }

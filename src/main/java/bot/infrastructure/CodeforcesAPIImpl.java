@@ -310,8 +310,24 @@ public class CodeforcesAPIImpl implements CodeforcesAPI {
         EmbedBuilder embed = new EmbedBuilder();
         embed.setTitle(handle + "'s Problem Ratings");
         embed.setColor(Color.YELLOW);
-        for (Map.Entry<Integer, Long> entry : problemRatings.entrySet()) {
-            embed.addField("Rating: " + entry.getKey(), "Solved: " + entry.getValue(), false);
+        for (int rate = 800; rate <= 2200; rate += 100) {
+            embed.addField("Rating: " + rate, "Solved: " + problemRatings.getOrDefault(rate, 0L), false);
+        }
+        return embed;
+    }
+
+    @Override
+    public EmbedBuilder compareProblemRatings(String handle1, String handle2) throws IOException {
+        Map<Integer, Long> problemRatings1 = fetchProblemRatings(handle1);
+        Map<Integer, Long> problemRatings2 = fetchProblemRatings(handle2);
+
+        EmbedBuilder embed = new EmbedBuilder();
+        embed.setTitle(handle1 + " vs " + handle2 + " Problem Ratings");
+        embed.setColor(Color.YELLOW);
+        for (int rate = 800; rate <= 2200; rate += 100) {
+            long solved1 = problemRatings1.getOrDefault(rate, 0L);
+            long solved2 = problemRatings2.getOrDefault(rate, 0L);
+            embed.addField("Rating: " + rate, handle1 + ": " + solved1 + "\n" + handle2 + ": " + solved2, false);
         }
         return embed;
     }

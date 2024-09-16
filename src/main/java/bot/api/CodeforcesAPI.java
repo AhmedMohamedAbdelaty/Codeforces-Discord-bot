@@ -26,4 +26,6 @@ public interface CodeforcesAPI {
     EmbedBuilder getRandomProblem(List<String> tagsList, int rateStart, int rateEnd) throws IOException;
 
     EmbedBuilder getProblemRatings(String handle) throws IOException;
+
+    EmbedBuilder compareProblemRatings(String handle1, String handle2) throws IOException;
 }
