@@ -2,6 +2,7 @@ package bot.infrastructure;
 
 import java.awt.Color;
 import java.awt.Font;
+import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
@@ -310,42 +311,57 @@ public class CodeforcesAPIImpl implements CodeforcesAPI {
     }
 
     @Override
-    public EmbedBuilder getProblemRatings(String handle) throws IOException {
+    public File getProblemRatings(String handle) throws IOException {
         Map<Integer, Long> problemRatings = fetchProblemRatings(handle);
-        EmbedBuilder embed = new EmbedBuilder();
-        embed.setTitle(handle + "'s Problem Ratings");
-        embed.setColor(Color.YELLOW);
-        for (int rate = 800; rate <= 2200; rate += 100) {
-            embed.addField("Rating: " + rate, "Solved: " + problemRatings.getOrDefault(rate, 0L), false);
-        }
-        return embed;
+        List<Integer> ratings = createRatingsList();
+        List<Long> solved = createSolvedList(problemRatings, ratings);
+
+        CategoryChart chart = createChart(handle + " Problem Ratings", handle, ratings, solved);
+
+        return saveChart(chart);
     }
 
     @Override
-    public String compareProblemRatings(String handle1, String handle2) throws IOException {
+    public File compareProblemRatings(String handle1, String handle2) throws IOException {
         Map<Integer, Long> problemRatings1 = fetchProblemRatings(handle1);
         Map<Integer, Long> problemRatings2 = fetchProblemRatings(handle2);
 
-        List<Integer> ratings = new ArrayList<>();
-        List<Long> solved1 = new ArrayList<>();
-        List<Long> solved2 = new ArrayList<>();
+        List<Integer> ratings = createRatingsList();
+        List<Long> solved1 = createSolvedList(problemRatings1, ratings);
+        List<Long> solved2 = createSolvedList(problemRatings2, ratings);
 
+        CategoryChart chart = createChart(handle1 + " vs " + handle2, handle1, ratings, solved1);
+        chart.addSeries(handle2, ratings, solved2);
+
+        return saveChart(chart);
+    }
+
+    private List<Integer> createRatingsList() {
+        List<Integer> ratings = new ArrayList<>();
         for (int rate = 800; rate <= 2200; rate += 100) {
             ratings.add(rate);
-            solved1.add(problemRatings1.getOrDefault(rate, 0L));
-            solved2.add(problemRatings2.getOrDefault(rate, 0L));
         }
+        return ratings;
+    }
 
+    private List<Long> createSolvedList(Map<Integer, Long> problemRatings, List<Integer> ratings) {
+        List<Long> solved = new ArrayList<>();
+        for (int rate : ratings) {
+            solved.add(problemRatings.getOrDefault(rate, 0L));
+        }
+        return solved;
+    }
+
+    private CategoryChart createChart(String title, String seriesName, List<Integer> ratings, List<Long> solved) {
         CategoryChart chart = new CategoryChartBuilder()
                 .width(1920)
                 .height(1080)
-                .title(handle1 + " vs " + handle2)
+                .title(title)
                 .xAxisTitle("Problem Rating")
                 .yAxisTitle("Number of Problems Solved")
                 .build();
 
-        chart.addSeries(handle1, ratings, solved1);
-        chart.addSeries(handle2, ratings, solved2);
+        chart.addSeries(seriesName, ratings, solved);
 
         Font font = new Font("Arial", Font.PLAIN, 20);
         chart.getStyler().setBaseFont(font);
@@ -355,17 +371,16 @@ public class CodeforcesAPIImpl implements CodeforcesAPI {
         chart.getStyler().setChartButtonFont(font);
         chart.getStyler().setChartTitleFont(font);
 
-
         chart.getStyler().setLegendPosition(Styler.LegendPosition.InsideNE);
         chart.getStyler().setStacked(false);
-
         chart.getStyler().setLabelsVisible(true);
         chart.getStyler().setLabelsFont(new Font("Arial", Font.BOLD, 20));
         chart.getStyler().setLabelsFontColorAutomaticEnabled(false);
+        return chart;
+    }
 
-        String filePath = "problem_ratings.png";
-        BitmapEncoder.saveBitmap(chart, filePath, BitmapEncoder.BitmapFormat.PNG);
-
-        return filePath;
+    private File saveChart(CategoryChart chart) throws IOException {
+        BitmapEncoder.saveBitmap(chart, "problem_ratings.png", BitmapEncoder.BitmapFormat.PNG);
+        return new File("problem_ratings.png");
     }
 }

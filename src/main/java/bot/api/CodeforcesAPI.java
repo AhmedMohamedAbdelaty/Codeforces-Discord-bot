@@ -1,5 +1,6 @@
 package bot.api;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.List;
 
@@ -25,7 +26,7 @@ public interface CodeforcesAPI {
     // Get a random problem
     EmbedBuilder getRandomProblem(List<String> tagsList, int rateStart, int rateEnd) throws IOException;
 
-    EmbedBuilder getProblemRatings(String handle) throws IOException;
+    File getProblemRatings(String handle) throws IOException;
 
-    String compareProblemRatings(String handle1, String handle2) throws IOException;
+    File compareProblemRatings(String handle1, String handle2) throws IOException;
 }

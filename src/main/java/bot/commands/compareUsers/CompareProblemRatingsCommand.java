@@ -1,6 +1,5 @@
 package bot.commands.compareUsers;
 
-import java.io.File;
 import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 
@@ -37,11 +36,9 @@ public class CompareProblemRatingsCommand implements Command {
             } catch (Exception e) {
                 throw new RuntimeException("Failed to retrieve problem ratings: " + e.getMessage(), e);
             }
-        }).thenAccept(filePath -> {
+        }).thenAccept(file -> {
                     EmbedBuilder embed = new EmbedBuilder();
                     embed.setTitle(username1 + " vs " + username2 + " Problem Ratings");
-                    embed.setImage("attachment://" + filePath);
-                    File file = new File(filePath);
                     if (file.exists()) {
                         hook.sendFiles(FileUpload.fromData(file)).addEmbeds(embed.build()).queue();
                     } else {
