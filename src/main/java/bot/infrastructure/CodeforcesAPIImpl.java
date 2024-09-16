@@ -8,21 +8,23 @@ import bot.domain.contest.Problem;
 import bot.domain.contest.ProblemSetResult;
 import bot.domain.contest.StandingsResponse;
 import bot.domain.user.Rating;
+import bot.domain.user.Submission;
 import bot.domain.user.UserInfo;
 import bot.util.EmbedBuilderUtil;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import net.dv8tion.jda.api.EmbedBuilder;
+import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import org.jetbrains.annotations.NotNull;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.awt.*;
 import java.io.IOException;
 import java.lang.reflect.Type;
-import java.util.LinkedHashMap;
+import java.time.ZonedDateTime;
+import java.util.*;
 import java.util.List;
-import java.util.Map;
-import java.util.Random;
-
 
 public class CodeforcesAPIImpl implements CodeforcesAPI {
     private static final String BASE_URL = "https://codeforces.com/api/";
@@ -36,10 +38,13 @@ public class CodeforcesAPIImpl implements CodeforcesAPI {
     @Override
     public EmbedBuilder getUserInfo(String handle) throws IOException {
         String url = BASE_URL + "user.info" + "?handles=" + handle;
+
         String jsonResponse = apiCaller.makeApiCall(url);
         Type responseType = new TypeToken<ApiResponse<List<UserInfo>>>() {
         }.getType();
         ApiResponse<List<UserInfo>> apiResponse = gson.fromJson(jsonResponse, responseType);
+
+
         if ("OK".equals(apiResponse.getStatus()) && apiResponse.getResult() != null && !apiResponse.getResult().isEmpty()) {
             return buildUserInfoEmbed(apiResponse.getResult().getFirst());
         } else {
@@ -177,13 +182,11 @@ public class CodeforcesAPIImpl implements CodeforcesAPI {
     public EmbedBuilder getStandingContestForUser(String handle, int contestId) throws IOException {
         String url = BASE_URL + "contest.standings?contestId=" + contestId + "&asManager=false&handles=" + handle;
         String jsonResponse = apiCaller.makeApiCall(url);
-
         Type responseType = new TypeToken<ApiResponse<StandingsResponse>>() {
         }.getType();
         ApiResponse<StandingsResponse> apiResponse = gson.fromJson(jsonResponse, responseType);
-
         if ("OK".equals(apiResponse.getStatus()) && apiResponse.getResult() != null && !apiResponse.getResult().getRows().isEmpty()) {
-            StandingsResponse.StandingsRow userStanding = apiResponse.getResult().getRows().getFirst();
+            StandingsResponse.StandingsRow userStanding = apiResponse.getResult().getRows().getFirst(); // Use get(0) instead of getFirst()
 
             String contestName = apiResponse.getResult().getContest().getName();
             String contestStartTime = new java.text.SimpleDateFormat("dd/MM/yyyy HH:mm:ss")
@@ -200,7 +203,6 @@ public class CodeforcesAPIImpl implements CodeforcesAPI {
 
             embed.addField("Start Time", contestStartTime, false);
             embed.addField("Rank", String.valueOf(userStanding.getRank()), false);
-//            embed.addField("Penalty", String.valueOf(userStanding.getPenalty()), false);
             embed.addField("Solved", userStanding.getProblemResults().stream().filter(pr -> pr.getPoints() > 0).count() + "/" + userStanding.getProblemResults().size(), false);
 
             List<Problem> problems = apiResponse.getResult().getProblems();
@@ -269,5 +271,69 @@ public class CodeforcesAPIImpl implements CodeforcesAPI {
         } else {
             throw new IOException("Failed to retrieve random problem");
         }
+    }
+
+
+    @Override
+    public EmbedBuilder getRandomContest(SlashCommandInteractionEvent event, List<String> usernames, String contestType, ZonedDateTime startTime, ZonedDateTime userTime) throws IOException {
+        String contestsURL = BASE_URL + "contest.list" + "?gym=false";
+        List<Contest> contests = getContests(contestsURL);
+
+        switch (contestType.toLowerCase()) {
+            case "div1":
+                contestType = "Div. 1";
+                break;
+            case "div2":
+                contestType = "Div. 2";
+                break;
+            case "div3":
+                contestType = "Div. 3";
+                break;
+            case "div4":
+                contestType = "Div. 4";
+                break;
+            default:
+        }
+
+        String finalContestType = contestType;
+        contests = contests.stream()
+                .filter(contest -> contest.getName().contains(finalContestType))
+                .toList();
+
+
+        // Set to store the contests that the users have participated in
+        Set<Integer> participatedContests = new HashSet<>();
+
+        for (String username : usernames) {
+            String userURL = BASE_URL + "user.status?handle=" + username;
+            String jsonResponse = apiCaller.makeApiCall(userURL);
+            Type responseType = new TypeToken<ApiResponse<List<Submission>>>() {
+            }.getType();
+            ApiResponse<List<Submission>> apiResponse = gson.fromJson(jsonResponse, responseType);
+
+
+            if ("OK".equals(apiResponse.getStatus()) && apiResponse.getResult() != null) {
+                for (Submission submission : apiResponse.getResult()) {
+                    if (submission.getVerdict() == Submission.Verdict.OK) {
+                        participatedContests.add(submission.getContestId());
+                    }
+                }
+            }
+        }
+
+        // Filter out contests that users have participated in
+        List<Contest> availableContests = contests.stream()
+                .filter(contest -> !participatedContests.contains(contest.getId()))
+                .toList();
+
+        if (availableContests.isEmpty()) {
+            throw new IOException("No suitable contests found.");
+        }
+
+        // Select a random contest
+        Random random = new Random();
+        Contest selectedContest = availableContests.get(random.nextInt(availableContests.size()));
+
+        return EmbedBuilderUtil.buildRandomContestEmbed(selectedContest, usernames, userTime, event);
     }
 }

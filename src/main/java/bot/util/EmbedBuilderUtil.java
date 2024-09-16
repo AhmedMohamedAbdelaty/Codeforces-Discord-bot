@@ -1,8 +1,12 @@
 package bot.util;
 
+import bot.api.ApiResponse;
+import bot.domain.contest.Contest;
 import bot.domain.contest.Problem;
+import bot.domain.contest.StandingsResponse;
 import bot.domain.user.Rating;
 import net.dv8tion.jda.api.EmbedBuilder;
+import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jfree.chart.ChartFactory;
@@ -11,13 +15,18 @@ import org.jfree.chart.JFreeChart;
 import org.jfree.data.time.Day;
 import org.jfree.data.time.TimeSeries;
 import org.jfree.data.time.TimeSeriesCollection;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.awt.*;
 import java.io.File;
 import java.io.IOException;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class EmbedBuilderUtil {
 
@@ -111,6 +120,80 @@ public class EmbedBuilderUtil {
         embed.addField("Rating", String.valueOf(problemRating), true);
         embed.addField("Tags", String.join(", ", tags), false);
 
+        return embed;
+    }
+
+    @NotNull
+    public static EmbedBuilder buildRandomContestEmbed(@NotNull Contest selectedContest, List<String> usernames, ZonedDateTime userTime, SlashCommandInteractionEvent event) {
+        EmbedBuilder embed = new EmbedBuilder();
+
+        embed.setTitle("🎉 Join this contest as a fun tournament!");
+        embed.setColor(Color.GREEN);
+
+        String contestUrl = "https://codeforces.com/contest/" + selectedContest.getId();
+        String nameAndLink = "[" + selectedContest.getName() + "](" + contestUrl + ")";
+        embed.addField("Contest Name", nameAndLink, false);
+
+        embed.addField("Contest ID", String.valueOf(selectedContest.getId()), false);
+
+        // Add contest details
+        embed.addField("Type", selectedContest.getType(), true);
+
+        // Custom start time (user input)
+        DateTimeFormatter friendlyFormatter = DateTimeFormatter.ofPattern("MMMM d, yyyy, h:mm a z");
+        String formattedCustomStartTime = userTime.format(friendlyFormatter);
+        embed.addField("Virtual Start Time", formattedCustomStartTime, false);
+
+        // Format duration
+        long hours = selectedContest.getDurationSeconds() / 3600;
+        long minutes = (selectedContest.getDurationSeconds() % 3600) / 60;
+        String duration = String.format("%d hours %d minutes", hours, minutes);
+        embed.addField("Duration", duration, false);
+
+
+        // Add participating users
+        List<String> participantsList = usernames.stream()
+                .map(username -> "[`" + username + "`](https://codeforces.com/profile/" + username + ")")
+                .collect(Collectors.toList());
+        String participants = String.join(", ", participantsList);
+        embed.addField("Participants", participants, false);
+
+        embed.setFooter("Let's see who will be rank one!");
+
+        return embed;
+    }
+
+    @NotNull
+    public static EmbedBuilder embedContestTournamentResult(ApiResponse<StandingsResponse> apiResponse) {
+
+        Logger logger = LoggerFactory.getLogger(EmbedBuilderUtil.class);
+        logger.info("Building contest tournament result embed");
+
+        StandingsResponse standingsResponse = apiResponse.getResult();
+        List<StandingsResponse.StandingsRow> standingsRows = standingsResponse.getRows();
+        List<Problem> problems = standingsResponse.getProblems();
+
+        EmbedBuilder embed = new EmbedBuilder();
+        embed.setTitle("Contest Results");
+        embed.setColor(Color.LIGHT_GRAY);
+
+        for (StandingsResponse.StandingsRow standingsRow : standingsRows) {
+            String username = standingsRow.getParty().getMembers().getFirst().getHandle();
+            int rank = standingsRow.getRank();
+            int solved = 0;
+            int wrong = 0;
+
+            for (StandingsResponse.ProblemResult problemResult : standingsRow.getProblemResults()) {
+                if (problemResult.getPoints() > 0) {
+                    solved++;
+                } else {
+                    wrong += problemResult.getRejectedAttemptCount();
+                }
+            }
+
+            String fieldValue = String.format("Rank: %d\nSolved: %d\nWrong: %d", rank, solved, wrong);
+            embed.addField(username, fieldValue, false);
+        }
         return embed;
     }
 }

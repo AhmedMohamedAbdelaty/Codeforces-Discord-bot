@@ -86,4 +86,18 @@ public class Contest {
     public void setRelativeTimeSeconds(int relativeTimeSeconds) {
         this.relativeTimeSeconds = relativeTimeSeconds;
     }
+
+    @Override
+    public String toString() {
+        return "Contest{" +
+               "id=" + id +
+               ", name='" + name + '\'' +
+               ", type='" + type + '\'' +
+               ", phase='" + phase + '\'' +
+               ", frozen=" + frozen +
+               ", durationSeconds=" + durationSeconds +
+               ", startTimeSeconds=" + startTimeSeconds +
+               ", relativeTimeSeconds=" + relativeTimeSeconds +
+               '}';
+    }
 }

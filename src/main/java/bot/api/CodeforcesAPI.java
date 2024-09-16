@@ -3,8 +3,10 @@ package bot.api;
 
 import bot.domain.user.Rating;
 import net.dv8tion.jda.api.EmbedBuilder;
+import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 
 import java.io.IOException;
+import java.time.ZonedDateTime;
 import java.util.List;
 
 public interface CodeforcesAPI {
@@ -25,4 +27,7 @@ public interface CodeforcesAPI {
 
     // Get a random problem
     EmbedBuilder getRandomProblem(List<String> tagsList, int rateStart, int rateEnd) throws IOException;
+
+    // Get a random contest
+    EmbedBuilder getRandomContest(SlashCommandInteractionEvent event, List<String> usernames, String contestType, ZonedDateTime startTime, ZonedDateTime userTime) throws IOException;
 }
