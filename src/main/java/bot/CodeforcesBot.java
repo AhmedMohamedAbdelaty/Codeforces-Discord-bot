@@ -1,5 +1,7 @@
 package bot;
 
+import javax.security.auth.login.LoginException;
+
 import bot.listener.DiscordEventListener;
 import net.dv8tion.jda.api.sharding.DefaultShardManagerBuilder;
 import net.dv8tion.jda.api.sharding.ShardManager;
@@ -7,10 +9,8 @@ import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.security.auth.login.LoginException;
-
 public class CodeforcesBot {
-    private static final Logger logger = LoggerFactory.getLogger(CodeforcesBot.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(CodeforcesBot.class);
     protected static CodeforcesBot selfBot;
     private ShardManager shardManager;
 
@@ -18,7 +18,7 @@ public class CodeforcesBot {
         try {
             shardManager = buildShardManager(token);
         } catch (LoginException e) {
-            logger.error("Failed to start bot! Please check the console for any errors.", e);
+            LOGGER.error("Failed to start bot! Please check the console for any errors.", e);
             System.exit(0);
         }
     }

@@ -1,16 +1,22 @@
 package bot;
 
-import com.sun.net.httpserver.HttpServer;
-import org.apache.commons.cli.*;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.io.IOException;
 import java.io.OutputStream;
 import java.net.InetSocketAddress;
 
+import com.sun.net.httpserver.HttpServer;
+import org.apache.commons.cli.CommandLine;
+import org.apache.commons.cli.CommandLineParser;
+import org.apache.commons.cli.DefaultParser;
+import org.apache.commons.cli.HelpFormatter;
+import org.apache.commons.cli.Option;
+import org.apache.commons.cli.Options;
+import org.apache.commons.cli.ParseException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 public class Main {
-    private static final Logger logger = LoggerFactory.getLogger(Main.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(Main.class);
 
     public static void main(String[] args) {
         Options options = new Options();
@@ -31,7 +37,7 @@ public class Main {
 
             String token = cmd.getOptionValue("token");
             if (token == null) {
-                logger.error("No token provided, please provide a token using the -t or --token flag.");
+                LOGGER.error("No token provided, please provide a token using the -t or --token flag.");
                 formatter.printHelp("", options);
                 System.exit(0);
             }
@@ -41,11 +47,11 @@ public class Main {
 
             CodeforcesBot.selfBot = new CodeforcesBot(token);
         } catch (ParseException e) {
-            logger.error("Failed to parse command line arguments: {}", e.getMessage());
+            LOGGER.error("Failed to parse command line arguments: {}", e.getMessage());
             formatter.printHelp("CodeforcesBot", options);
             System.exit(1);
         } catch (IOException e) {
-            logger.error("Failed to start health check server: {}", e.getMessage());
+            LOGGER.error("Failed to start health check server: {}", e.getMessage());
             System.exit(1);
         }
     }
@@ -61,6 +67,6 @@ public class Main {
         });
         server.setExecutor(null);
         server.start();
-        logger.info("Health check server started on port 8000");
+        LOGGER.info("Health check server started on port 8000");
     }
 }

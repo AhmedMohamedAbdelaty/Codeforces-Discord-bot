@@ -1,5 +1,9 @@
 package bot.commands;
 
+import java.util.HashMap;
+import java.util.Map;
+
+import bot.commands.compareUsers.CompareProblemRatingsCommand;
 import bot.commands.contestCommands.FinishedContestsCommand;
 import bot.commands.contestCommands.StandingCommand;
 import bot.commands.contestCommands.UpcomingContestsCommand;
@@ -9,9 +13,6 @@ import bot.commands.userCommands.UserInfoCommand;
 import net.dv8tion.jda.api.interactions.commands.build.Commands;
 import net.dv8tion.jda.api.requests.restaction.CommandListUpdateAction;
 import org.jetbrains.annotations.NotNull;
-
-import java.util.HashMap;
-import java.util.Map;
 
 import static net.dv8tion.jda.api.interactions.commands.OptionType.STRING;
 
@@ -37,6 +38,8 @@ public class CommandFactory {
         // random problem
         register("random-problem", new RandomProblemCommand());
 
+        // compare problem ratings
+         register("compare-problem-ratings", new CompareProblemRatingsCommand());
     }
 
     public static void register(String name, Command command) {
@@ -66,7 +69,11 @@ public class CommandFactory {
                 Commands.slash("random-problem", "Get a random problem")
                         .addOption(STRING, "rating_start", "Rating start", true)
                         .addOption(STRING, "rating_end", "Rating end", true)
-                        .addOption(STRING, "tags", "Problem tags(separated by comma)", false)
+                        .addOption(STRING, "tags", "Problem tags(separated by comma)", false),
+
+                Commands.slash("compare-problem-ratings", "Compare problem ratings")
+                        .addOption(STRING, "username1", "Codeforces username 1", true)
+                        .addOption(STRING, "username2", "Codeforces username 2", true)
         ).queue();
     }
 }
