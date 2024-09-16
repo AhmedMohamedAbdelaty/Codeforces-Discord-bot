@@ -24,7 +24,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Random;
 
-
 public class CodeforcesAPIImpl implements CodeforcesAPI {
     private static final String BASE_URL = "https://codeforces.com/api/";
     private static final Gson gson = new Gson();
@@ -37,13 +36,27 @@ public class CodeforcesAPIImpl implements CodeforcesAPI {
 
     @Override
     public EmbedBuilder getUserInfo(String handle) throws IOException {
+        String cacheKey = "user_info:" + handle; // Unique cache key
+
+        // Check Redis Cache
+        UserInfo cachedUserInfo = redisUtil.getObjectFromRedis(cacheKey, UserInfo.class);
+        if (cachedUserInfo != null) {
+            return buildUserInfoEmbed(cachedUserInfo);
+        }
+
+        // If not cached, fetch from the API
         String url = BASE_URL + "user.info" + "?handles=" + handle;
         String jsonResponse = apiCaller.makeApiCall(url);
-        Type responseType = new TypeToken<ApiResponse<List<UserInfo>>>() {
-        }.getType();
+        Type responseType = new TypeToken<ApiResponse<List<UserInfo>>>() {}.getType();
         ApiResponse<List<UserInfo>> apiResponse = gson.fromJson(jsonResponse, responseType);
+
         if ("OK".equals(apiResponse.getStatus()) && apiResponse.getResult() != null && !apiResponse.getResult().isEmpty()) {
-            return buildUserInfoEmbed(apiResponse.getResult().getFirst());
+            UserInfo userInfo = apiResponse.getResult().get(0);
+
+            // Cache the result
+            redisUtil.storeObjectInRedis(cacheKey, userInfo);
+
+            return buildUserInfoEmbed(userInfo);
         } else {
             throw new IOException("Failed to retrieve user info");
         }
@@ -51,8 +64,7 @@ public class CodeforcesAPIImpl implements CodeforcesAPI {
 
     private List<Contest> getContests(String url) throws IOException {
         String jsonResponse = apiCaller.makeApiCall(url);
-        Type responseType = new TypeToken<ApiResponse<List<Contest>>>() {
-        }.getType();
+        Type responseType = new TypeToken<ApiResponse<List<Contest>>>() {}.getType();
         ApiResponse<List<Contest>> apiResponse = gson.fromJson(jsonResponse, responseType);
 
         if ("OK".equals(apiResponse.getStatus()) && apiResponse.getResult() != null) {
@@ -64,16 +76,33 @@ public class CodeforcesAPIImpl implements CodeforcesAPI {
 
     @Override
     public EmbedBuilder getUpcomingContests() throws IOException {
+        String cacheKey = "upcoming_contests";
+
+        // Check Redis Cache
+        List<Contest> cachedContests = redisUtil.getObjectFromRedis(cacheKey, List.class);
+        if (cachedContests != null) {
+            return buildContestsEmbed(cachedContests, "Upcoming Contests", Color.ORANGE, "BEFORE");
+        }
+
+        // Fetch from the API if not cached
         String url = BASE_URL + "contest.list" + "?gym=false";
         List<Contest> contests = getContests(url);
 
+        // Cache the result
+        redisUtil.storeObjectInRedis(cacheKey, contests);
+
+        return buildContestsEmbed(contests, "Upcoming Contests", Color.ORANGE, "BEFORE");
+    }
+
+    // Helper method to build EmbedBuilder for contests
+    private EmbedBuilder buildContestsEmbed(List<Contest> contests, String title, Color color, String phaseFilter) {
         EmbedBuilder embed = new EmbedBuilder();
-        embed.setTitle("Upcoming Contests");
-        embed.setColor(Color.ORANGE);
+        embed.setTitle(title);
+        embed.setColor(color);
 
         int count = 0;
         for (Contest contest : contests) {
-            if (contest.getPhase().equals("BEFORE")) {
+            if (contest.getPhase().equals(phaseFilter)) {
                 String name = contest.getName();
                 String contestId = String.valueOf(contest.getId());
                 String startTime = new java.text.SimpleDateFormat("dd/MM/yyyy HH:mm:ss").format(new java.util.Date(contest.getStartTimeSeconds() * 1000));
@@ -91,7 +120,7 @@ public class CodeforcesAPIImpl implements CodeforcesAPI {
                 } else {
                     relativeTime = String.valueOf(relativeTimeSeconds / 3600) + " hours";
                 }
-                // add the id after the name
+
                 embed.addField(name + " (ID: " + contestId + ")", "Start Time: " + startTime + "\nDuration: " + duration + "\n" + relativeTime, false);
                 count++;
 
@@ -101,7 +130,6 @@ public class CodeforcesAPIImpl implements CodeforcesAPI {
             } else {
                 break;
             }
-
         }
         return embed;
     }
@@ -109,42 +137,22 @@ public class CodeforcesAPIImpl implements CodeforcesAPI {
     // Return last 5 finished contests
     @Override
     public EmbedBuilder getFinishedContests() throws IOException {
+        String cacheKey = "finished_contests";
+
+        // Check Redis Cache
+        List<Contest> cachedContests = redisUtil.getObjectFromRedis(cacheKey, List.class);
+        if (cachedContests != null) {
+            return buildContestsEmbed(cachedContests, "Finished Contests", Color.GREEN, "FINISHED");
+        }
+
+        // Fetch from the API if not cached
         String url = BASE_URL + "contest.list" + "?gym=false";
         List<Contest> contests = getContests(url);
 
-        EmbedBuilder embed = new EmbedBuilder();
-        embed.setTitle("Finished Contests");
-        embed.setColor(Color.GREEN);
+        // Cache the result
+        redisUtil.storeObjectInRedis(cacheKey, contests);
 
-        int count = 0;
-        for (Contest contest : contests) {
-            if (contest.getPhase().equals("FINISHED")) {
-                redisUtil.storeObjectInRedis("contest_" + count, contest);
-                String name = contest.getName();
-                String contestId = String.valueOf(contest.getId());
-                String startTime = new java.text.SimpleDateFormat("dd/MM/yyyy HH:mm:ss").format(new java.util.Date(contest.getStartTimeSeconds() * 1000));
-                String duration = String.valueOf(contest.getDurationSeconds() / 3600) + " hours";
-
-                long relativeTimeSeconds = contest.getRelativeTimeSeconds();
-                String relativeTime;
-
-                // Relative time should be like : "Finished 2 days ago" or "Finished 2 hours ago" or "Finished 2 minutes ago"
-                long absTimeSeconds = Math.abs(relativeTimeSeconds);
-                long days = absTimeSeconds / (24 * 3600);
-                long hours = (absTimeSeconds % (24 * 3600)) / 3600;
-                long minutes = (absTimeSeconds % 3600) / 60;
-                relativeTime = String.format("Finished %d days %d hours %d minutes ago", days, hours, minutes);
-
-                // add the id after the name
-                embed.addField(name + " (ID: " + contestId + ")", "Start Time: " + startTime + "\nDuration: " + duration + "\n" + relativeTime, false);
-                count++;
-
-                if (count == 5) {
-                    break;
-                }
-            }
-        }
-        return embed;
+        return buildContestsEmbed(contests, "Finished Contests", Color.GREEN, "FINISHED");
     }
 
     private EmbedBuilder buildUserInfoEmbed(UserInfo userInfo) {
@@ -181,8 +189,7 @@ public class CodeforcesAPIImpl implements CodeforcesAPI {
         String url = BASE_URL + "contest.standings?contestId=" + contestId + "&asManager=false&handles=" + handle;
         String jsonResponse = apiCaller.makeApiCall(url);
 
-        Type responseType = new TypeToken<ApiResponse<StandingsResponse>>() {
-        }.getType();
+        Type responseType = new TypeToken<ApiResponse<StandingsResponse>>() {}.getType();
         ApiResponse<StandingsResponse> apiResponse = gson.fromJson(jsonResponse, responseType);
 
         if ("OK".equals(apiResponse.getStatus()) && apiResponse.getResult() != null && !apiResponse.getResult().getRows().isEmpty()) {
@@ -203,7 +210,6 @@ public class CodeforcesAPIImpl implements CodeforcesAPI {
 
             embed.addField("Start Time", contestStartTime, false);
             embed.addField("Rank", String.valueOf(userStanding.getRank()), false);
-//            embed.addField("Penalty", String.valueOf(userStanding.getPenalty()), false);
             embed.addField("Solved", userStanding.getProblemResults().stream().filter(pr -> pr.getPoints() > 0).count() + "/" + userStanding.getProblemResults().size(), false);
 
             List<Problem> problems = apiResponse.getResult().getProblems();
@@ -233,14 +239,27 @@ public class CodeforcesAPIImpl implements CodeforcesAPI {
 
     @Override
     public List<Rating> getRatingHistory(String handle) throws IOException {
+        String cacheKey = "rating_history:" + handle;
+
+        // Check Redis Cache
+        List<Rating> cachedRatings = redisUtil.getObjectFromRedis(cacheKey, List.class);
+        if (cachedRatings != null) {
+            return cachedRatings;
+        }
+
+        // Fetch from the API if not cached
         String url = BASE_URL + "user.rating" + "?handle=" + handle;
         String jsonResponse = apiCaller.makeApiCall(url);
-        Type responseType = new TypeToken<ApiResponse<List<Rating>>>() {
-        }.getType();
+        Type responseType = new TypeToken<ApiResponse<List<Rating>>>() {}.getType();
         ApiResponse<List<Rating>> apiResponse = gson.fromJson(jsonResponse, responseType);
 
         if ("OK".equals(apiResponse.getStatus()) && apiResponse.getResult() != null) {
-            return apiResponse.getResult();
+            List<Rating> ratings = apiResponse.getResult();
+
+            // Cache the result
+            redisUtil.storeObjectInRedis(cacheKey, ratings);
+
+            return ratings;
         } else {
             throw new IOException("Failed to retrieve rating history");
         }
@@ -254,8 +273,7 @@ public class CodeforcesAPIImpl implements CodeforcesAPI {
         }
         String jsonResponse = apiCaller.makeApiCall(url);
 
-        Type responseType = new TypeToken<ApiResponse<ProblemSetResult>>() {
-        }.getType();
+        Type responseType = new TypeToken<ApiResponse<ProblemSetResult>>() {}.getType();
         ApiResponse<ProblemSetResult> apiResponse = gson.fromJson(jsonResponse, responseType);
 
         if ("OK".equals(apiResponse.getStatus()) && apiResponse.getResult() != null) {
