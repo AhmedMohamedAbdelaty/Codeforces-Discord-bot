@@ -1,18 +1,5 @@
 package bot.infrastructure;
 
-import java.awt.Color;
-import java.awt.Font;
-import java.io.File;
-import java.io.IOException;
-import java.lang.reflect.Type;
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Random;
-import java.util.Set;
-import java.util.stream.Collectors;
-
 import bot.api.ApiCaller;
 import bot.api.ApiResponse;
 import bot.api.CodeforcesAPI;
@@ -33,6 +20,18 @@ import org.knowm.xchart.BitmapEncoder;
 import org.knowm.xchart.CategoryChart;
 import org.knowm.xchart.CategoryChartBuilder;
 import org.knowm.xchart.style.Styler;
+
+import java.awt.*;
+import java.io.File;
+import java.io.IOException;
+import java.lang.reflect.Type;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Random;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 public class CodeforcesAPIImpl implements CodeforcesAPI {
     private static final String BASE_URL = "https://codeforces.com/api/";
@@ -301,9 +300,9 @@ public class CodeforcesAPIImpl implements CodeforcesAPI {
     private Map<Integer, Long> fetchProblemRatings(String handle) throws IOException {
         List<Submission> submissions = getUserSubmissions(handle);
         Set<Problem> acceptedProblems = submissions.stream()
-                .filter(submission -> Verdict.OK.toString().equals(submission.getVerdict()))
-                .map(Submission::getProblem)
-                .collect(Collectors.toSet());
+                                                   .filter(submission -> Verdict.OK.toString().equals(submission.getVerdict()))
+                                                   .map(Submission::getProblem)
+                                                   .collect(Collectors.toSet());
 
         return acceptedProblems.stream()
                                .filter(problem -> problem.getRating() > 0)

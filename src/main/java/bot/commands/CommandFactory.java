@@ -1,8 +1,5 @@
 package bot.commands;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import bot.commands.compareUsers.CompareProblemRatingsCommand;
 import bot.commands.contestCommands.FinishedContestsCommand;
 import bot.commands.contestCommands.StandingCommand;
@@ -14,6 +11,9 @@ import bot.commands.userCommands.UserInfoCommand;
 import net.dv8tion.jda.api.interactions.commands.build.Commands;
 import net.dv8tion.jda.api.requests.restaction.CommandListUpdateAction;
 import org.jetbrains.annotations.NotNull;
+
+import java.util.HashMap;
+import java.util.Map;
 
 import static net.dv8tion.jda.api.interactions.commands.OptionType.STRING;
 

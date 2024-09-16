@@ -1,11 +1,12 @@
 package bot.api;
 
-import java.io.File;
-import java.io.IOException;
-import java.util.List;
 
 import bot.domain.user.Rating;
 import net.dv8tion.jda.api.EmbedBuilder;
+
+import java.io.File;
+import java.io.IOException;
+import java.util.List;
 
 public interface CodeforcesAPI {
     // Get user information
