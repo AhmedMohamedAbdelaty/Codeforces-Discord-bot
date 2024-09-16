@@ -4,7 +4,6 @@ import bot.CodeforcesBot;
 import bot.commands.Command;
 import bot.commands.CommandFactory;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
-import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.events.session.ReadyEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import net.dv8tion.jda.api.requests.restaction.CommandListUpdateAction;
@@ -68,9 +67,6 @@ public class DiscordEventListener extends ListenerAdapter {
     public void onSlashCommandInteraction(@NotNull SlashCommandInteractionEvent event) {
         Command command = CommandFactory.getCommand(event.getName());
         if (command != null) {
-            // Log the user who used the command
-//            logger.info("Command used by: " + event.getUser().getName() + " (ID: " + event.getUser().getId() + ")");
-
             command.execute(event);
         } else {
             event.reply("Unknown command").queue();
@@ -80,20 +76,4 @@ public class DiscordEventListener extends ListenerAdapter {
     public void resetGuildCommands(@NotNull ShardManager shardManager, String guildId) {
         Objects.requireNonNull(shardManager.getGuildById(guildId)).updateCommands().queue();
     }
-
-//    @Override
-//    public void onMessageReceived(MessageReceivedEvent event) {
-//        logger.info("Server name: " + event.getGuild().getName()
-//                    + " Server ID: " + event.getGuild().getId()
-//                    + " Channel: " + event.getChannel()
-//                    + " User: " + event.getAuthor()
-//                    + " Message: " + event.getMessage().getContentDisplay()
-//                    + " Message ID: " + event.getMessageId()
-//                    + event.getMember());
-//
-//        /*
-//        Output example:
-//         Server name: am0103738 Server ID: 423085629807788032 Channel: TextChannel:general(id=423085629807788034) User: SelfUser:test-Codeforces bot(id=1284923117948370977) Message:  Message ID: 1284943171234828412Member:test-Codeforces bot(id=1284923117948370977, user=SelfUser:test-Codeforces bot(id=1284923117948370977), guild=Guild:am0103738(id=423085629807788032))
-//         */
-//    }
 }
