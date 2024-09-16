@@ -6,13 +6,13 @@ public class Submission {
     private int id;
     private int contestId;
     private Problem problem;
-    private Verdict verdict;
+    private String verdict;
 
     public Problem getProblem() {
         return problem;
     }
 
-    public Verdict getVerdict() {
+    public String getVerdict() {
         return verdict;
     }
 }

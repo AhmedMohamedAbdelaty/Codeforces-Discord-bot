@@ -7,6 +7,8 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import bot.api.ApiCaller;
 import bot.api.ApiResponse;
@@ -287,16 +289,30 @@ public class CodeforcesAPIImpl implements CodeforcesAPI {
         }
     }
 
-    @Override
-    public Map<Integer, Integer> getProblemRatings(String handle) throws IOException {
+    /**
+     * @return a map of problem ratings and the number of problems solved by the user with that rating
+     */
+    private Map<Integer, Long> fetchProblemRatings(String handle) throws IOException {
         List<Submission> submissions = getUserSubmissions(handle);
-        Map<Integer, Integer> problemRatings = new LinkedHashMap<>();
-        for (Submission submission : submissions) {
-            if (submission.getVerdict().equals(Verdict.OK)) {
-                int rating = submission.getProblem().getRating();
-                problemRatings.put(rating, problemRatings.getOrDefault(rating, 0) + 1);
-            }
+        Set<Problem> acceptedProblems = submissions.stream()
+                .filter(submission -> Verdict.OK.toString().equals(submission.getVerdict()))
+                .map(Submission::getProblem)
+                .collect(Collectors.toSet());
+
+        return acceptedProblems.stream()
+                               .filter(problem -> problem.getRating() > 0)
+                               .collect(Collectors.groupingBy(Problem::getRating, Collectors.counting()));
+    }
+
+    @Override
+    public EmbedBuilder getProblemRatings(String handle) throws IOException {
+        Map<Integer, Long> problemRatings = fetchProblemRatings(handle);
+        EmbedBuilder embed = new EmbedBuilder();
+        embed.setTitle(handle + "'s Problem Ratings");
+        embed.setColor(Color.YELLOW);
+        for (Map.Entry<Integer, Long> entry : problemRatings.entrySet()) {
+            embed.addField("Rating: " + entry.getKey(), "Solved: " + entry.getValue(), false);
         }
-        return problemRatings;
+        return embed;
     }
 }
