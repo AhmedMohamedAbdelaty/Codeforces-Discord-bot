@@ -1,8 +1,10 @@
 package bot.infrastructure;
 
 import java.awt.Color;
+import java.awt.Font;
 import java.io.IOException;
 import java.lang.reflect.Type;
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -26,7 +28,10 @@ import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import net.dv8tion.jda.api.EmbedBuilder;
 import org.jetbrains.annotations.NotNull;
-
+import org.knowm.xchart.BitmapEncoder;
+import org.knowm.xchart.CategoryChart;
+import org.knowm.xchart.CategoryChartBuilder;
+import org.knowm.xchart.style.Styler;
 
 public class CodeforcesAPIImpl implements CodeforcesAPI {
     private static final String BASE_URL = "https://codeforces.com/api/";
@@ -317,18 +322,50 @@ public class CodeforcesAPIImpl implements CodeforcesAPI {
     }
 
     @Override
-    public EmbedBuilder compareProblemRatings(String handle1, String handle2) throws IOException {
+    public String compareProblemRatings(String handle1, String handle2) throws IOException {
         Map<Integer, Long> problemRatings1 = fetchProblemRatings(handle1);
         Map<Integer, Long> problemRatings2 = fetchProblemRatings(handle2);
 
-        EmbedBuilder embed = new EmbedBuilder();
-        embed.setTitle(handle1 + " vs " + handle2 + " Problem Ratings");
-        embed.setColor(Color.YELLOW);
+        List<Integer> ratings = new ArrayList<>();
+        List<Long> solved1 = new ArrayList<>();
+        List<Long> solved2 = new ArrayList<>();
+
         for (int rate = 800; rate <= 2200; rate += 100) {
-            long solved1 = problemRatings1.getOrDefault(rate, 0L);
-            long solved2 = problemRatings2.getOrDefault(rate, 0L);
-            embed.addField("Rating: " + rate, handle1 + ": " + solved1 + "\n" + handle2 + ": " + solved2, false);
+            ratings.add(rate);
+            solved1.add(problemRatings1.getOrDefault(rate, 0L));
+            solved2.add(problemRatings2.getOrDefault(rate, 0L));
         }
-        return embed;
+
+        CategoryChart chart = new CategoryChartBuilder()
+                .width(1920)
+                .height(1080)
+                .title(handle1 + " vs " + handle2)
+                .xAxisTitle("Problem Rating")
+                .yAxisTitle("Number of Problems Solved")
+                .build();
+
+        chart.addSeries(handle1, ratings, solved1);
+        chart.addSeries(handle2, ratings, solved2);
+
+        Font font = new Font("Arial", Font.PLAIN, 20);
+        chart.getStyler().setBaseFont(font);
+        chart.getStyler().setLegendFont(font);
+        chart.getStyler().setAxisTickLabelsFont(font);
+        chart.getStyler().setAxisTitleFont(font);
+        chart.getStyler().setChartButtonFont(font);
+        chart.getStyler().setChartTitleFont(font);
+
+
+        chart.getStyler().setLegendPosition(Styler.LegendPosition.InsideNE);
+        chart.getStyler().setStacked(false);
+
+        chart.getStyler().setLabelsVisible(true);
+        chart.getStyler().setLabelsFont(new Font("Arial", Font.BOLD, 20));
+        chart.getStyler().setLabelsFontColorAutomaticEnabled(false);
+
+        String filePath = "problem_ratings.png";
+        BitmapEncoder.saveBitmap(chart, filePath, BitmapEncoder.BitmapFormat.PNG);
+
+        return filePath;
     }
 }

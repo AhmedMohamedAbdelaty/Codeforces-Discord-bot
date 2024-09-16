@@ -27,5 +27,5 @@ public interface CodeforcesAPI {
 
     EmbedBuilder getProblemRatings(String handle) throws IOException;
 
-    EmbedBuilder compareProblemRatings(String handle1, String handle2) throws IOException;
+    String compareProblemRatings(String handle1, String handle2) throws IOException;
 }
