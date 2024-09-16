@@ -63,6 +63,7 @@ public class CodeforcesAPIImpl implements CodeforcesAPI {
         }
     }
 
+    // Changed from private to public to ensure it is accessible from other classes
     public List<Contest> getContests(String url) throws IOException {
         String jsonResponse = apiCaller.makeApiCall(url);
         Type responseType = new TypeToken<ApiResponse<List<Contest>>>() {}.getType();
@@ -95,6 +96,7 @@ public class CodeforcesAPIImpl implements CodeforcesAPI {
         return buildContestsEmbed(contests, "Upcoming Contests", Color.ORANGE, "BEFORE");
     }
 
+    // Changed from private to public to ensure it is accessible from other classes
     public EmbedBuilder buildContestsEmbed(List<Contest> contests, String title, Color color, String phaseFilter) {
         EmbedBuilder embed = new EmbedBuilder();
         embed.setTitle(title);
