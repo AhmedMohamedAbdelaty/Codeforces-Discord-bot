@@ -3,7 +3,6 @@ package bot.infrastructure;
 import bot.api.ApiCaller;
 import bot.api.ApiResponse;
 import bot.api.CodeforcesAPI;
-import bot.commands.contestCommands.RandomContestCommand;
 import bot.domain.contest.Contest;
 import bot.domain.contest.Problem;
 import bot.domain.contest.ProblemSetResult;
@@ -21,13 +20,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.awt.*;
-import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Type;
 import java.time.ZonedDateTime;
 import java.util.*;
 import java.util.List;
-
 
 public class CodeforcesAPIImpl implements CodeforcesAPI {
     private static final String BASE_URL = "https://codeforces.com/api/";
@@ -185,13 +182,11 @@ public class CodeforcesAPIImpl implements CodeforcesAPI {
     public EmbedBuilder getStandingContestForUser(String handle, int contestId) throws IOException {
         String url = BASE_URL + "contest.standings?contestId=" + contestId + "&asManager=false&handles=" + handle;
         String jsonResponse = apiCaller.makeApiCall(url);
-
         Type responseType = new TypeToken<ApiResponse<StandingsResponse>>() {
         }.getType();
         ApiResponse<StandingsResponse> apiResponse = gson.fromJson(jsonResponse, responseType);
-
         if ("OK".equals(apiResponse.getStatus()) && apiResponse.getResult() != null && !apiResponse.getResult().getRows().isEmpty()) {
-            StandingsResponse.StandingsRow userStanding = apiResponse.getResult().getRows().getFirst();
+            StandingsResponse.StandingsRow userStanding = apiResponse.getResult().getRows().getFirst(); // Use get(0) instead of getFirst()
 
             String contestName = apiResponse.getResult().getContest().getName();
             String contestStartTime = new java.text.SimpleDateFormat("dd/MM/yyyy HH:mm:ss")
@@ -208,7 +203,6 @@ public class CodeforcesAPIImpl implements CodeforcesAPI {
 
             embed.addField("Start Time", contestStartTime, false);
             embed.addField("Rank", String.valueOf(userStanding.getRank()), false);
-//            embed.addField("Penalty", String.valueOf(userStanding.getPenalty()), false);
             embed.addField("Solved", userStanding.getProblemResults().stream().filter(pr -> pr.getPoints() > 0).count() + "/" + userStanding.getProblemResults().size(), false);
 
             List<Problem> problems = apiResponse.getResult().getProblems();
@@ -340,6 +334,6 @@ public class CodeforcesAPIImpl implements CodeforcesAPI {
         Random random = new Random();
         Contest selectedContest = availableContests.get(random.nextInt(availableContests.size()));
 
-        return EmbedBuilderUtil.buildRandomContestEmbed(selectedContest, usernames, userTime);
+        return EmbedBuilderUtil.buildRandomContestEmbed(selectedContest, usernames, userTime, event);
     }
 }

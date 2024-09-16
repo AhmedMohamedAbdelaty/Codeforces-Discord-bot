@@ -1,9 +1,12 @@
 package bot.util;
 
+import bot.api.ApiResponse;
 import bot.domain.contest.Contest;
 import bot.domain.contest.Problem;
+import bot.domain.contest.StandingsResponse;
 import bot.domain.user.Rating;
 import net.dv8tion.jda.api.EmbedBuilder;
+import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jfree.chart.ChartFactory;
@@ -12,6 +15,8 @@ import org.jfree.chart.JFreeChart;
 import org.jfree.data.time.Day;
 import org.jfree.data.time.TimeSeries;
 import org.jfree.data.time.TimeSeriesCollection;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.awt.*;
 import java.io.File;
@@ -119,12 +124,17 @@ public class EmbedBuilderUtil {
     }
 
     @NotNull
-    public static EmbedBuilder buildRandomContestEmbed(@NotNull Contest selectedContest, List<String> usernames, ZonedDateTime userTime) {
+    public static EmbedBuilder buildRandomContestEmbed(@NotNull Contest selectedContest, List<String> usernames, ZonedDateTime userTime, SlashCommandInteractionEvent event) {
         EmbedBuilder embed = new EmbedBuilder();
-        String contestUrl = "https://codeforces.com/contest/" + selectedContest.getId();
-        embed.setTitle("🎉 Contest: " + selectedContest.getName(), contestUrl);
+
+        embed.setTitle("🎉 Join this contest as a fun tournament!");
         embed.setColor(Color.GREEN);
-        embed.setDescription("Join this contest as a fun tournament!");
+
+        String contestUrl = "https://codeforces.com/contest/" + selectedContest.getId();
+        String nameAndLink = "[" + selectedContest.getName() + "](" + contestUrl + ")";
+        embed.addField("Contest Name", nameAndLink, false);
+
+        embed.addField("Contest ID", String.valueOf(selectedContest.getId()), false);
 
         // Add contest details
         embed.addField("Type", selectedContest.getType(), true);
@@ -132,7 +142,7 @@ public class EmbedBuilderUtil {
         // Custom start time (user input)
         DateTimeFormatter friendlyFormatter = DateTimeFormatter.ofPattern("MMMM d, yyyy, h:mm a z");
         String formattedCustomStartTime = userTime.format(friendlyFormatter);
-        embed.addField("Virtual Start Time", formattedCustomStartTime, true);
+        embed.addField("Virtual Start Time", formattedCustomStartTime, false);
 
         // Format duration
         long hours = selectedContest.getDurationSeconds() / 3600;
@@ -150,6 +160,40 @@ public class EmbedBuilderUtil {
 
         embed.setFooter("Let's see who will be rank one!");
 
+        return embed;
+    }
+
+    @NotNull
+    public static EmbedBuilder embedContestTournamentResult(ApiResponse<StandingsResponse> apiResponse) {
+
+        Logger logger = LoggerFactory.getLogger(EmbedBuilderUtil.class);
+        logger.info("Building contest tournament result embed");
+
+        StandingsResponse standingsResponse = apiResponse.getResult();
+        List<StandingsResponse.StandingsRow> standingsRows = standingsResponse.getRows();
+        List<Problem> problems = standingsResponse.getProblems();
+
+        EmbedBuilder embed = new EmbedBuilder();
+        embed.setTitle("Contest Results");
+        embed.setColor(Color.LIGHT_GRAY);
+
+        for (StandingsResponse.StandingsRow standingsRow : standingsRows) {
+            String username = standingsRow.getParty().getMembers().getFirst().getHandle();
+            int rank = standingsRow.getRank();
+            int solved = 0;
+            int wrong = 0;
+
+            for (StandingsResponse.ProblemResult problemResult : standingsRow.getProblemResults()) {
+                if (problemResult.getPoints() > 0) {
+                    solved++;
+                } else {
+                    wrong += problemResult.getRejectedAttemptCount();
+                }
+            }
+
+            String fieldValue = String.format("Rank: %d\nSolved: %d\nWrong: %d", rank, solved, wrong);
+            embed.addField(username, fieldValue, false);
+        }
         return embed;
     }
 }

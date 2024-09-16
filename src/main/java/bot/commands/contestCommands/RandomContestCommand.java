@@ -5,6 +5,7 @@ import bot.commands.Command;
 import bot.infrastructure.CodeforcesAPIImpl;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.interactions.InteractionHook;
+import net.dv8tion.jda.api.interactions.components.buttons.Button;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
@@ -37,7 +38,7 @@ public class RandomContestCommand implements Command {
         logger.info("Command used by: {}\nMessage: {}", event.getUser().getName(), event.getOptions());
 
         // Defer the reply
-        event.deferReply().queue();
+        event.deferReply(true).queue();
 
         String usernames = Objects.requireNonNull(event.getOption("usernames")).getAsString();
         String contestType = Objects.requireNonNull(event.getOption("contest_type")).getAsString();
@@ -59,6 +60,9 @@ public class RandomContestCommand implements Command {
             return;
         }
 
+        Button confirmButton = Button.success("confirm_contest", "Confirm");
+        Button cancelButton = Button.danger("cancel_contest", "Cancel");
+
         CompletableFuture.supplyAsync(() -> {
             try {
                 return codeforcesAPI.getRandomContest(event, usernamesList, contestType, startTimeZoned, userTime);
@@ -68,7 +72,10 @@ public class RandomContestCommand implements Command {
             }
             return null;
         }).thenAccept(embedBuilder ->
-                hook.sendMessageEmbeds(embedBuilder.build()).queue()
+                        hook.sendMessageEmbeds(embedBuilder.build())
+                                .setActionRow(confirmButton, cancelButton)
+                                .setEphemeral(true)
+                                .queue()
         ).exceptionally(throwable -> {
             hook.sendMessage("Error: " + throwable.getCause().getMessage()).queue();
             return null;
