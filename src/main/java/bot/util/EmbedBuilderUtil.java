@@ -1,6 +1,7 @@
 package bot.util;
 
 import bot.domain.contest.Problem;
+import bot.domain.contest.StandingsResponse;
 import bot.domain.user.Rating;
 import net.dv8tion.jda.api.EmbedBuilder;
 import org.jetbrains.annotations.NotNull;
@@ -110,6 +111,48 @@ public class EmbedBuilderUtil {
         embed.setColor(Color.GREEN);
         embed.addField("Rating", String.valueOf(problemRating), true);
         embed.addField("Tags", String.join(", ", tags), false);
+
+        return embed;
+    }
+
+    public static EmbedBuilder buildStandingEmbed(StandingsResponse standingsResponse, String handle, int contestId) {
+        StandingsResponse.StandingsRow userStanding = standingsResponse.getRows().getFirst();
+
+        String contestName = standingsResponse.getContest().getName();
+        String contestStartTime = new java.text.SimpleDateFormat("dd/MM/yyyy HH:mm:ss")
+                .format(new java.util.Date(standingsResponse.getContest().getStartTimeSeconds() * 1000));
+
+        EmbedBuilder embed = new EmbedBuilder();
+        embed.setTitle("`" + handle + "`" + "'s Standing in Contest");
+        embed.setColor(Color.cyan);
+
+        String contestUrl = "https://codeforces.com/contest/" + contestId;
+        String contestFieldTitle = "Contest";
+        String contestFieldValue = String.format("[%s](%s) (ID: %s)", contestName, contestUrl, contestId);
+        embed.addField(contestFieldTitle, contestFieldValue, false);
+
+        embed.addField("Start Time", contestStartTime, false);
+        embed.addField("Rank", String.valueOf(userStanding.getRank()), false);
+        embed.addField("Solved", userStanding.getProblemResults().stream().filter(pr -> pr.getPoints() > 0).count() + "/" + userStanding.getProblemResults().size(), false);
+
+        List<Problem> problems = standingsResponse.getProblems();
+        int problemCount = 0;
+
+        for (StandingsResponse.ProblemResult problemResult : userStanding.getProblemResults()) {
+            Problem problem = problems.get(problemCount++);
+
+            String problemName = problem.getName();
+            String problemLink = "https://codeforces.com/contest/" + contestId + "/problem/" + problem.getIndex();
+            String problemRating = problem.getRating() > 0 ? "Rating: " + problem.getRating() : "Unrated";
+            String problemStatus = problemResult.getPoints() > 0 ? "Solved" : "Unsolved";
+            String problemDetails = problemStatus + " (" + problemResult.getRejectedAttemptCount() + " wrong attempts)";
+            if (problemResult.getPoints() > 0) {
+                problemDetails += "\nSolved after: " + problemResult.getBestSubmissionTimeSeconds() / 60 + " minutes";
+            }
+
+            String fieldValue = String.format("[%s](%s) (%s)\n%s\n%s", problemName, problemLink, problem.getIndex(), problemRating, problemDetails);
+            embed.addField("Problem", fieldValue, false);
+        }
 
         return embed;
     }
