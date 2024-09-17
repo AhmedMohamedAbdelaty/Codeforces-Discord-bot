@@ -10,6 +10,7 @@ contests, user standings, and more directly through Discord commands.
 - **User Information**: Retrieve and display information about a Codeforces user.
 - **Contest Information**: Get details about upcoming and finished contests.
 - **User Contest Standings**: Check the standing of a user in a specific contest.
+- **Contest Tournament**: Suggest a random contest of a specified type for users. The contest will be one that none of the given usernames have participated in before. When the contest is over, the bot will announce the winners.
 - **Health Check**: A simple HTTP server for health checks.
 
 ## How to Use
@@ -23,6 +24,8 @@ contests, user standings, and more directly through Discord commands.
     - `/standing username:<username> contest_id:<contestId>`: Get a user's standing in a specific contest.
     - `/random-problem ratingSart:<ratingStart> ratingEnd:<ratingEnd> [tags:<tag1,tag2,...>]`: Get a random problem from Codeforces, given rating and tags.
     - `/rating-history username:<username>`: Get the rating history graph of a user.
+    <!-- /random-contest usernames: _AhmedMohamed_, Shayan contest_type: div3 start_time: 2024-09-16 07:37:00 +03:00 -->
+    - `/random-contest usernames:<username1>,<username2>,... contest_type:<contestType> [start_time:<startTime>]`: Suggest a random contest for a virtual tournament. Announce the winners when the contest is over.
 
 ## Screenshots
 
@@ -50,6 +53,21 @@ https://github.com/AhmedMohamedAbdelaty/Codeforces-Discord-bot/assets/73834838/e
 
 
 https://github.com/AhmedMohamedAbdelaty/Codeforces-Discord-bot/assets/73834838/98cdc743-214a-430b-bcef-21448ecc36d7
+
+6. **Contest Tournament**:
+
+After the virtual contest ends, the bot will send the participants' ranks along with details like:
+
+- Number of solved problems
+- Number of wrong answers during the contest
+
+The bot can handle multiple time zones. The user can also confirm or cancel the command using buttons.
+
+![image](https://github.com/user-attachments/assets/bdf178bb-ad8d-400a-af31-1c287dc6e5d0)
+
+![image](https://github.com/user-attachments/assets/dc3589c5-2c88-4ee8-85a1-08b8b25201c0)
+
+![image](https://github.com/user-attachments/assets/599868d4-052f-4af4-b797-2e683e2c50e0)
 
 ## Setup
 
