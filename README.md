@@ -12,6 +12,10 @@ contests, user standings, and more directly through Discord commands.
 - **User Contest Standings**: Check the standing of a user in a specific contest.
 - **Health Check**: A simple HTTP server for health checks.
 
+## Redis Caching:
+
+API responses are cached using Redis to reduce redundant API calls, improving performance.
+
 ## How to Use
 1. **Invite the Bot**:
     - Click [here](https://discord.com/api/oauth2/authorize?client_id=1257793557838692473&permissions=0&scope=bot%20applications.commands) to invite the bot to your server.
@@ -67,9 +71,11 @@ mvn clean install
 
 3. **Run the Docker Container**:
 
+The docker image will run the bot and a Redis server. You need to provide the bot token to run the bot.
+
 ```
 docker build -t codeforces-bot .
-docker run -d -p 8000:8000 codeforces-bot -t <your_bot_token>
+docker run -p 8000:8000 -p 6379:6379 codeforces-bot -t <your_bot_token>
 ```
 
 ## Contributing
