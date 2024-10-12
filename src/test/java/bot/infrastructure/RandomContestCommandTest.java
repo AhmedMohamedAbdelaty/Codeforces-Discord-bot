@@ -23,7 +23,7 @@ import java.util.*;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
-class CodeforcesAPIImplTest {
+class RandomContestCommandTest {
 
     @Mock
     private ApiCaller apiCaller;
