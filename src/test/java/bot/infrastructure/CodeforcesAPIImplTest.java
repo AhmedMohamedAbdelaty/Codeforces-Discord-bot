@@ -1,7 +1,7 @@
 package bot.infrastructure;
 
 import bot.domain.user.Submission;
-import bot.infrastructure.CodeforcesAPIImpl;
+import com.google.gson.JsonSyntaxException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
@@ -278,9 +278,9 @@ public class CodeforcesAPIImplTest {
 
         assertNotNull(result);
         assertEquals(3, result.size());
-        assertEquals(1L, result.get(800));
-        assertEquals(1L, result.get(1000));
-        assertEquals(1L, result.get(1200));
+        assertEquals(1, result.get(800));
+        assertEquals(1, result.get(1000));
+        assertEquals(1, result.get(1200));
     }
 
     @Test
@@ -288,6 +288,6 @@ public class CodeforcesAPIImplTest {
         String invalidJsonResponse = "This is not a valid JSON";
         when(apiCaller.makeApiCall(anyString())).thenReturn(invalidJsonResponse);
 
-        assertThrows(com.google.gson.JsonSyntaxException.class, () -> codeforcesAPI.getUserSubmissions("username"));
+        assertThrows(JsonSyntaxException.class, () -> codeforcesAPI.getUserSubmissions("username"));
     }
 }
