@@ -36,7 +36,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class ContestTimerHandler extends ListenerAdapter {
-    private final Map<String, ScheduledExecutorService> activeTimers = new HashMap<>();
+    final Map<String, ScheduledExecutorService> activeTimers = new HashMap<>();
     private final Logger logger = LoggerFactory.getLogger(ContestTimerHandler.class);
     private static final String BASE_URL = "https://codeforces.com/api/";
     private static final Gson gson = new Gson();
@@ -82,10 +82,12 @@ public class ContestTimerHandler extends ListenerAdapter {
                 .map(Button::asDisabled)
                 .toList();
 
-        // Edit the message to disable the buttons
-        message.editMessageComponents(
-                Collections.singletonList(ActionRow.of(updatedButtons))
-        ).queue();
+        // Ensure the list of buttons is not empty before creating the ActionRow
+        if (!updatedButtons.isEmpty()) {
+            message.editMessageComponents(
+                    Collections.singletonList(ActionRow.of(updatedButtons))
+            ).queue();
+        }
 
 
         // Example: "2 hours 25 minutes"
