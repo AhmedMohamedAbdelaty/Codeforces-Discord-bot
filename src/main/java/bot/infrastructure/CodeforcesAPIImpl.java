@@ -280,7 +280,7 @@ public class CodeforcesAPIImpl implements CodeforcesAPI {
         }
     }
 
-    public List<Submission> getUserSubmissions(String handle) throws IOException {
+    private List<Submission> getUserSubmissions(String handle) throws IOException {
         String url = BASE_URL + "user.status" + "?handle=" + handle;
         String jsonResponse = apiCaller.makeApiCall(url);
         Type responseType = new TypeToken<ApiResponse<List<Submission>>>() {
@@ -297,7 +297,7 @@ public class CodeforcesAPIImpl implements CodeforcesAPI {
     /**
      * @return a map of problem ratings and the number of problems solved by the user with that rating
      */
-    public Map<Integer, Long> fetchProblemRatings(String handle) throws IOException {
+    private Map<Integer, Long> fetchProblemRatings(String handle) throws IOException {
         List<Submission> submissions = getUserSubmissions(handle);
         Set<Problem> acceptedProblems = submissions.stream()
                                                    .filter(submission -> Verdict.OK.toString().equals(submission.getVerdict()))
