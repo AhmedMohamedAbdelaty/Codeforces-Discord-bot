@@ -41,6 +41,8 @@ public class CompareProblemRatingsCommand implements Command {
                     embed.setTitle(username1 + " vs " + username2 + " Problem Ratings");
                     if (file.exists()) {
                         hook.sendFiles(FileUpload.fromData(file)).addEmbeds(embed.build()).queue();
+                        // Delete the file
+                        file.delete();
                     } else {
                         hook.sendMessage("Failed to generate problem ratings graph.").queue();
                     }

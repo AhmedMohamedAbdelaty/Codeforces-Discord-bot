@@ -6,6 +6,7 @@ import bot.domain.contest.Contest;
 import bot.domain.contest.Party;
 import bot.domain.contest.Problem;
 import bot.domain.user.Submission;
+import bot.domain.user.Verdict;
 import com.google.gson.Gson;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
@@ -53,12 +54,11 @@ class RandomContestCommandTest {
         // Mock the user status response
         Problem problem1 = new Problem();
         Party author = new Party(2018, List.of(new Party.Member("_AhmedMohamed_")), "CONTESTANT", false, 1692887700);
-        Submission.Verdict verdict = Submission.Verdict.OK;
         Submission.Testset testset = Submission.Testset.TESTS;
 
         List<Submission> submissions = Arrays.asList(
-                new Submission(220287033, 342, 1692895752, 8052, problem1, author, "C++20 (GCC 11-64)", verdict, testset, 17, 15, 0, null),
-                new Submission(220263495, 54, 1692893677, 5977, problem1, author, "C++20 (GCC 11-64)", verdict, testset, 19, 77, 20889600, null)
+                new Submission(220287033, 342, 1692895752, 8052, problem1, author, "C++20 (GCC 11-64)", Verdict.OK, testset, 17, 15, 0, null),
+                new Submission(220263495, 54, 1692893677, 5977, problem1, author, "C++20 (GCC 11-64)", Verdict.OK, testset, 19, 77, 20889600, null)
         );
         ApiResponse<List<Submission>> submissionApiResponse = new ApiResponse<>("OK", submissions);
         String submissionJsonResponse = new Gson().toJson(submissionApiResponse);
@@ -99,11 +99,10 @@ class RandomContestCommandTest {
         // Mock the user status response
         Problem problem1 = new Problem();
         Party author = new Party(2018, List.of(new Party.Member("_AhmedMohamed_")), "CONTESTANT", false, 1692887700);
-        Submission.Verdict verdict = Submission.Verdict.OK;
         Submission.Testset testset = Submission.Testset.TESTS;
         List<Submission> submissions = Arrays.asList(
-                new Submission(220287033, 2018, 1692895752, 8052, problem1, author, "C++20 (GCC 11-64)", verdict, testset, 17, 15, 0, null),
-                new Submission(220263495, 2019, 1692893677, 5977, problem1, author, "C++20 (GCC 11-64)", verdict, testset, 19, 77, 20889600, null)
+                new Submission(220287033, 2018, 1692895752, 8052, problem1, author, "C++20 (GCC 11-64)", Verdict.OK, testset, 17, 15, 0, null),
+                new Submission(220263495, 2019, 1692893677, 5977, problem1, author, "C++20 (GCC 11-64)", Verdict.OK, testset, 19, 77, 20889600, null)
         );
         ApiResponse<List<Submission>> submissionApiResponse = new ApiResponse<>("OK", submissions);
         String submissionJsonResponse = new Gson().toJson(submissionApiResponse);

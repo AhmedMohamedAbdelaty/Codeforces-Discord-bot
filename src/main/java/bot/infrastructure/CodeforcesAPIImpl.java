@@ -324,7 +324,7 @@ public class CodeforcesAPIImpl implements CodeforcesAPI {
 
             if ("OK".equals(apiResponse.getStatus()) && apiResponse.getResult() != null) {
                 for (Submission submission : apiResponse.getResult()) {
-                    if (submission.getVerdict() == Submission.Verdict.OK) {
+                    if (submission.getVerdict().equals(Verdict.OK.toString())) {
                         participatedContests.add(submission.getContestId());
                     }
                 }
@@ -346,6 +346,7 @@ public class CodeforcesAPIImpl implements CodeforcesAPI {
 
         return EmbedBuilderUtil.buildRandomContestEmbed(selectedContest, usernames, userTime, event);
     }
+
     public List<Submission> getUserSubmissions(String handle) throws IOException {
         String url = BASE_URL + "user.status" + "?handle=" + handle;
         String jsonResponse = apiCaller.makeApiCall(url);

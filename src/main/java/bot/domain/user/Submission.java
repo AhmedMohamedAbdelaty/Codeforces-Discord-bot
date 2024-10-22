@@ -12,12 +12,12 @@ public class Submission {
     private Problem problem;
     private Party author;
     private String programmingLanguage;
-    private Verdict verdict; // Can be absent
     private Testset testset;
     private int passedTestCount;
     private int timeConsumedMillis;
     private long memoryConsumedBytes;
     private Float points; // Can be absent
+    private String verdict;
 
     @Override
     public String toString() {
@@ -29,20 +29,12 @@ public class Submission {
                ", problem=" + problem +
                ", author=" + author +
                ", programmingLanguage='" + programmingLanguage + '\'' +
-               ", verdict=" + verdict +
                ", testset=" + testset +
                ", passedTestCount=" + passedTestCount +
                ", timeConsumedMillis=" + timeConsumedMillis +
                ", memoryConsumedBytes=" + memoryConsumedBytes +
                ", points=" + points +
                '}';
-    }
-
-    // Enum for Verdict
-    public enum Verdict {
-        FAILED, OK, PARTIAL, COMPILATION_ERROR, RUNTIME_ERROR, WRONG_ANSWER, PRESENTATION_ERROR,
-        TIME_LIMIT_EXCEEDED, MEMORY_LIMIT_EXCEEDED, IDLENESS_LIMIT_EXCEEDED, SECURITY_VIOLATED,
-        CRASHED, INPUT_PREPARATION_CRASHED, CHALLENGED, SKIPPED, TESTING, REJECTED
     }
 
     // Enum for Testset
@@ -63,12 +55,15 @@ public class Submission {
         this.problem = problem;
         this.author = author;
         this.programmingLanguage = programmingLanguage;
-        this.verdict = verdict;
         this.testset = testset;
         this.passedTestCount = passedTestCount;
         this.timeConsumedMillis = timeConsumedMillis;
         this.memoryConsumedBytes = memoryConsumedBytes;
         this.points = points;
+    }
+
+    public String getVerdict() {
+        return verdict;
     }
 
     // Getters and Setters
@@ -126,14 +121,6 @@ public class Submission {
 
     public void setProgrammingLanguage(String programmingLanguage) {
         this.programmingLanguage = programmingLanguage;
-    }
-
-    public Verdict getVerdict() {
-        return verdict;
-    }
-
-    public void setVerdict(Verdict verdict) {
-        this.verdict = verdict;
     }
 
     public Testset getTestset() {
