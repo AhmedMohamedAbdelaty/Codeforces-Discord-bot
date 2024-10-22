@@ -21,6 +21,10 @@ public class RedisCache {
         initializePool();
     }
 
+    public static void setPool(JedisPool jedisPool) {
+        pool = jedisPool;
+    }
+
     public static void initializePool() {
         if (pool == null) {
             JedisPoolConfig config = new JedisPoolConfig();

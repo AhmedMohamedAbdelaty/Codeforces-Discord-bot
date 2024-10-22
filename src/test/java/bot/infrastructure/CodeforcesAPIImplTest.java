@@ -1,6 +1,7 @@
 package bot.infrastructure;
 
 import bot.domain.user.Rating;
+import bot.cache.RedisCache;
 import bot.domain.user.Submission;
 import com.google.gson.JsonSyntaxException;
 import net.dv8tion.jda.api.EmbedBuilder;
@@ -12,6 +13,8 @@ import static org.mockito.Mockito.*;
 import static org.junit.jupiter.api.Assertions.*;
 
 import bot.api.ApiCaller;
+import redis.clients.jedis.Jedis;
+import redis.clients.jedis.JedisPool;
 
 import java.io.File;
 import java.io.IOException;
@@ -24,12 +27,22 @@ public class CodeforcesAPIImplTest {
     @Mock
     private ApiCaller apiCaller;
 
+    @Mock
+    private JedisPool jedisPool;
+
+    @Mock
+    private Jedis jedis;
+
     private CodeforcesAPIImpl codeforcesAPI;
 
     @BeforeEach
     void setUp() {
         MockitoAnnotations.openMocks(this);
         codeforcesAPI = new CodeforcesAPIImpl(apiCaller);
+
+        // Mock RedisCache
+        RedisCache.setPool(jedisPool);
+        when(jedisPool.getResource()).thenReturn(jedis);
     }
 
     @Test

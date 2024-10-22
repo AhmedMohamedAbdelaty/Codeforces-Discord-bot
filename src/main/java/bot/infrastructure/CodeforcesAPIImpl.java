@@ -390,7 +390,7 @@ public class CodeforcesAPIImpl implements CodeforcesAPI {
 
             if ("OK".equals(apiResponse.getStatus()) && apiResponse.getResult() != null) {
                 for (Submission submission : apiResponse.getResult()) {
-                    if (submission.getVerdict().equals(Verdict.OK.toString())) {
+                    if (submission.getVerdict() != null && submission.getVerdict().equals(Verdict.OK.toString())) {
                         participatedContests.add(submission.getContestId());
                     }
                 }
