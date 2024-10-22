@@ -21,8 +21,6 @@ import org.knowm.xchart.BitmapEncoder;
 import org.knowm.xchart.CategoryChart;
 import org.knowm.xchart.CategoryChartBuilder;
 import org.knowm.xchart.style.Styler;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.awt.*;
 import java.io.File;
@@ -348,8 +346,6 @@ public class CodeforcesAPIImpl implements CodeforcesAPI {
 
         return EmbedBuilderUtil.buildRandomContestEmbed(selectedContest, usernames, userTime, event);
     }
-}
-
     public List<Submission> getUserSubmissions(String handle) throws IOException {
         String url = BASE_URL + "user.status" + "?handle=" + handle;
         String jsonResponse = apiCaller.makeApiCall(url);
@@ -370,13 +366,13 @@ public class CodeforcesAPIImpl implements CodeforcesAPI {
     public Map<Integer, Long> fetchProblemRatings(String handle) throws IOException {
         List<Submission> submissions = getUserSubmissions(handle);
         Set<Problem> acceptedProblems = submissions.stream()
-                                                   .filter(submission -> Verdict.OK.toString().equals(submission.getVerdict()))
-                                                   .map(Submission::getProblem)
-                                                   .collect(Collectors.toSet());
+                .filter(submission -> Verdict.OK.toString().equals(submission.getVerdict()))
+                .map(Submission::getProblem)
+                .collect(Collectors.toSet());
 
         return acceptedProblems.stream()
-                               .filter(problem -> problem.getRating() > 0)
-                               .collect(Collectors.groupingBy(Problem::getRating, Collectors.counting()));
+                .filter(problem -> problem.getRating() > 0)
+                .collect(Collectors.groupingBy(Problem::getRating, Collectors.counting()));
     }
 
     @Override
