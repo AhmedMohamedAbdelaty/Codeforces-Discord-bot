@@ -1,9 +1,11 @@
 package bot.domain.contest;
 
+import java.io.Serializable;
 import java.util.List;
 import java.util.Objects;
 
-public class Problem {
+public class Problem implements Serializable{
+    private static final long serialVersionUID = 2L;
     private int contestId;
     private String index;
     private String name;

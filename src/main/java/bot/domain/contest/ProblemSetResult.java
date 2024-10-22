@@ -1,8 +1,10 @@
 package bot.domain.contest;
 
+import java.io.Serializable;
 import java.util.List;
 
-public class ProblemSetResult {
+public class ProblemSetResult implements Serializable{
+    private static final long serialVersionUID = 3L;
     private List<Problem> problems;
     private List<ProblemStatistics> problemStatistics;
 

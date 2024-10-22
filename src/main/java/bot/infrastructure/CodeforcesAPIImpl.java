@@ -3,6 +3,7 @@ package bot.infrastructure;
 import bot.api.ApiCaller;
 import bot.api.ApiResponse;
 import bot.api.CodeforcesAPI;
+import bot.cache.RedisCache;
 import bot.domain.contest.Contest;
 import bot.domain.contest.Problem;
 import bot.domain.contest.ProblemSetResult;
@@ -36,10 +37,16 @@ import java.util.Random;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import static bot.util.EmbedBuilderUtil.buildStandingEmbed;
+
+
 public class CodeforcesAPIImpl implements CodeforcesAPI {
     private static final String BASE_URL = "https://codeforces.com/api/";
     private static final Gson gson = new Gson();
     private final ApiCaller apiCaller;
+    private static final int CACHE_EXPIRATION_SECONDS_PROBLEMS = 60 * 60 * 24 * 7; // 1 week
+    private static final int CACHE_EXPIRATION_SECONDS_USER_INFO = 60 * 60 * 24; // 1 day
+    private static final int CACHE_EXPIRATION_SECONDS_CONTESTS = 60 * 60 * 24; // 1 day
 
     public CodeforcesAPIImpl(ApiCaller apiCaller) {
         this.apiCaller = apiCaller;
@@ -47,9 +54,21 @@ public class CodeforcesAPIImpl implements CodeforcesAPI {
 
     @Override
     public EmbedBuilder getUserInfo(String handle) throws IOException {
+        String cacheKey = "user_info_" + handle;
+        String cachedResponse = RedisCache.get(cacheKey);
+
+        if (cachedResponse != null) {
+            Type responseType = new TypeToken<ApiResponse<List<UserInfo>>>() {
+            }.getType();
+            ApiResponse<List<UserInfo>> apiResponse = gson.fromJson(cachedResponse, responseType);
+            return buildUserInfoEmbed(apiResponse.getResult().getFirst());
+        }
+
         String url = BASE_URL + "user.info" + "?handles=" + handle;
 
         String jsonResponse = apiCaller.makeApiCall(url);
+        RedisCache.setWithExpiration(cacheKey, jsonResponse, CACHE_EXPIRATION_SECONDS_USER_INFO);
+
         Type responseType = new TypeToken<ApiResponse<List<UserInfo>>>() {
         }.getType();
         ApiResponse<List<UserInfo>> apiResponse = gson.fromJson(jsonResponse, responseType);
@@ -63,7 +82,19 @@ public class CodeforcesAPIImpl implements CodeforcesAPI {
     }
 
     private List<Contest> getContests(String url) throws IOException {
+        String cacheKey = "contests_" + url.hashCode();
+        String cachedResponse = RedisCache.get(cacheKey);
+
+        if (cachedResponse != null) {
+            Type responseType = new TypeToken<ApiResponse<List<Contest>>>() {
+            }.getType();
+            ApiResponse<List<Contest>> apiResponse = gson.fromJson(cachedResponse, responseType);
+            return apiResponse.getResult();
+        }
+
         String jsonResponse = apiCaller.makeApiCall(url);
+        RedisCache.setWithExpiration(cacheKey, jsonResponse, CACHE_EXPIRATION_SECONDS_CONTESTS);
+
         Type responseType = new TypeToken<ApiResponse<List<Contest>>>() {
         }.getType();
         ApiResponse<List<Contest>> apiResponse = gson.fromJson(jsonResponse, responseType);
@@ -190,8 +221,20 @@ public class CodeforcesAPIImpl implements CodeforcesAPI {
 
     @Override
     public EmbedBuilder getStandingContestForUser(String handle, int contestId) throws IOException {
+        String cacheKey = "standing_" + handle + "_" + contestId;
+        String cachedResponse = RedisCache.get(cacheKey);
+
+        if (cachedResponse != null) {
+            Type responseType = new TypeToken<ApiResponse<StandingsResponse>>() {
+            }.getType();
+            ApiResponse<StandingsResponse> apiResponse = gson.fromJson(cachedResponse, responseType);
+            return buildStandingEmbed(apiResponse.getResult(), handle, contestId);
+        }
+
         String url = BASE_URL + "contest.standings?contestId=" + contestId + "&asManager=false&handles=" + handle;
         String jsonResponse = apiCaller.makeApiCall(url);
+        RedisCache.setWithExpiration(cacheKey, jsonResponse, CACHE_EXPIRATION_SECONDS_CONTESTS);
+
         Type responseType = new TypeToken<ApiResponse<StandingsResponse>>() {
         }.getType();
         ApiResponse<StandingsResponse> apiResponse = gson.fromJson(jsonResponse, responseType);
@@ -234,7 +277,7 @@ public class CodeforcesAPIImpl implements CodeforcesAPI {
                 embed.addField("Problem", fieldValue, false);
             }
 
-            return embed;
+            return buildStandingEmbed(apiResponse.getResult(), handle, contestId);
         } else {
             throw new IOException("Failed to retrieve user standings");
         }
@@ -242,10 +285,20 @@ public class CodeforcesAPIImpl implements CodeforcesAPI {
 
     @Override
     public List<Rating> getRatingHistory(String handle) throws IOException {
+        String cacheKey = "rating_history_" + handle;
+        String cachedResponse = RedisCache.get(cacheKey);
+
+        if (cachedResponse != null) {
+            Type responseType = new TypeToken<ApiResponse<List<Rating>>>() {}.getType();
+            ApiResponse<List<Rating>> apiResponse = gson.fromJson(cachedResponse, responseType);
+            return apiResponse.getResult();
+        }
+
         String url = BASE_URL + "user.rating" + "?handle=" + handle;
         String jsonResponse = apiCaller.makeApiCall(url);
-        Type responseType = new TypeToken<ApiResponse<List<Rating>>>() {
-        }.getType();
+        RedisCache.setWithExpiration(cacheKey, jsonResponse, CACHE_EXPIRATION_SECONDS_USER_INFO);
+
+        Type responseType = new TypeToken<ApiResponse<List<Rating>>>() {}.getType();
         ApiResponse<List<Rating>> apiResponse = gson.fromJson(jsonResponse, responseType);
 
         if ("OK".equals(apiResponse.getStatus()) && apiResponse.getResult() != null) {
@@ -257,30 +310,43 @@ public class CodeforcesAPIImpl implements CodeforcesAPI {
 
     @Override
     public EmbedBuilder getRandomProblem(@NotNull List<String> tagsList, int rateStart, int rateEnd) throws IOException {
+        String cacheKey = "problem_set_" + String.join("_", tagsList) + "_" + rateStart + "_" + rateEnd;
+        String cachedResponse = RedisCache.get(cacheKey);
+
+        if (cachedResponse != null) {
+            Type responseType = new TypeToken<ApiResponse<ProblemSetResult>>() {}.getType();
+            ApiResponse<ProblemSetResult> apiResponse = gson.fromJson(cachedResponse, responseType);
+            return getRandomProblemFromResult(apiResponse.getResult(), rateStart, rateEnd);
+        }
+
         String url = BASE_URL + "problemset.problems";
         if (!tagsList.isEmpty()) {
             url += "?tags=" + String.join(";", tagsList);
         }
         String jsonResponse = apiCaller.makeApiCall(url);
+        RedisCache.setWithExpiration(cacheKey, jsonResponse, CACHE_EXPIRATION_SECONDS_PROBLEMS);
 
-        Type responseType = new TypeToken<ApiResponse<ProblemSetResult>>() {
-        }.getType();
+        Type responseType = new TypeToken<ApiResponse<ProblemSetResult>>() {}.getType();
         ApiResponse<ProblemSetResult> apiResponse = gson.fromJson(jsonResponse, responseType);
 
         if ("OK".equals(apiResponse.getStatus()) && apiResponse.getResult() != null) {
-            List<Problem> problems = apiResponse.getResult().getProblems();
-            List<Problem> filteredProblems = problems.stream()
-                    .filter(problem -> problem.getRating() >= rateStart && problem.getRating() <= rateEnd)
-                    .toList();
-            if (filteredProblems.isEmpty()) {
-                throw new IOException("No problem found in the given rating range");
-            }
-            Random random = new Random();
-            Problem randomProblem = filteredProblems.get(random.nextInt(filteredProblems.size()));
-            return EmbedBuilderUtil.buildRandomProblemEmbed(randomProblem);
+            return getRandomProblemFromResult(apiResponse.getResult(), rateStart, rateEnd);
         } else {
             throw new IOException("Failed to retrieve random problem");
         }
+    }
+
+    private EmbedBuilder getRandomProblemFromResult(ProblemSetResult result, int rateStart, int rateEnd) throws IOException {
+        List<Problem> problems = result.getProblems();
+        List<Problem> filteredProblems = problems.stream()
+                .filter(problem -> problem.getRating() >= rateStart && problem.getRating() <= rateEnd)
+                .toList();
+        if (filteredProblems.isEmpty()) {
+            throw new IOException("No problem found in the given rating range");
+        }
+        Random random = new Random();
+        Problem randomProblem = filteredProblems.get(random.nextInt(filteredProblems.size()));
+        return EmbedBuilderUtil.buildRandomProblemEmbed(randomProblem);
     }
 
 
