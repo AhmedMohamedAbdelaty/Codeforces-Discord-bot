@@ -10,21 +10,33 @@ import bot.domain.contest.StandingsResponse;
 import bot.domain.user.Rating;
 import bot.domain.user.Submission;
 import bot.domain.user.UserInfo;
+import bot.domain.user.Verdict;
 import bot.util.EmbedBuilderUtil;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import org.jetbrains.annotations.NotNull;
+import org.knowm.xchart.BitmapEncoder;
+import org.knowm.xchart.CategoryChart;
+import org.knowm.xchart.CategoryChartBuilder;
+import org.knowm.xchart.style.Styler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.awt.*;
+import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Type;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.time.ZonedDateTime;
 import java.util.*;
 import java.util.List;
+import java.util.Map;
+import java.util.Random;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 public class CodeforcesAPIImpl implements CodeforcesAPI {
     private static final String BASE_URL = "https://codeforces.com/api/";
@@ -335,5 +347,109 @@ public class CodeforcesAPIImpl implements CodeforcesAPI {
         Contest selectedContest = availableContests.get(random.nextInt(availableContests.size()));
 
         return EmbedBuilderUtil.buildRandomContestEmbed(selectedContest, usernames, userTime, event);
+    }
+}
+
+    public List<Submission> getUserSubmissions(String handle) throws IOException {
+        String url = BASE_URL + "user.status" + "?handle=" + handle;
+        String jsonResponse = apiCaller.makeApiCall(url);
+        Type responseType = new TypeToken<ApiResponse<List<Submission>>>() {
+        }.getType();
+        ApiResponse<List<Submission>> apiResponse = gson.fromJson(jsonResponse, responseType);
+
+        if ("OK".equals(apiResponse.getStatus()) && apiResponse.getResult() != null) {
+            return apiResponse.getResult();
+        } else {
+            throw new IOException("Failed to retrieve user submissions");
+        }
+    }
+
+    /**
+     * @return a map of problem ratings and the number of problems solved by the user with that rating
+     */
+    public Map<Integer, Long> fetchProblemRatings(String handle) throws IOException {
+        List<Submission> submissions = getUserSubmissions(handle);
+        Set<Problem> acceptedProblems = submissions.stream()
+                                                   .filter(submission -> Verdict.OK.toString().equals(submission.getVerdict()))
+                                                   .map(Submission::getProblem)
+                                                   .collect(Collectors.toSet());
+
+        return acceptedProblems.stream()
+                               .filter(problem -> problem.getRating() > 0)
+                               .collect(Collectors.groupingBy(Problem::getRating, Collectors.counting()));
+    }
+
+    @Override
+    public File getProblemRatings(String handle) throws IOException {
+        Map<Integer, Long> problemRatings = fetchProblemRatings(handle);
+        List<Integer> ratings = createRatingsList();
+        List<Long> solved = createSolvedList(problemRatings, ratings);
+
+        CategoryChart chart = createChart(handle + " Problem Ratings", handle, ratings, solved);
+
+        return saveChart(chart);
+    }
+
+    @Override
+    public File compareProblemRatings(String handle1, String handle2) throws IOException {
+        Map<Integer, Long> problemRatings1 = fetchProblemRatings(handle1);
+        Map<Integer, Long> problemRatings2 = fetchProblemRatings(handle2);
+
+        List<Integer> ratings = createRatingsList();
+        List<Long> solved1 = createSolvedList(problemRatings1, ratings);
+        List<Long> solved2 = createSolvedList(problemRatings2, ratings);
+
+        CategoryChart chart = createChart(handle1 + " vs " + handle2, handle1, ratings, solved1);
+        chart.addSeries(handle2, ratings, solved2);
+
+        return saveChart(chart);
+    }
+
+    private List<Integer> createRatingsList() {
+        List<Integer> ratings = new ArrayList<>();
+        for (int rate = 800; rate <= 2200; rate += 100) {
+            ratings.add(rate);
+        }
+        return ratings;
+    }
+
+    private List<Long> createSolvedList(Map<Integer, Long> problemRatings, List<Integer> ratings) {
+        List<Long> solved = new ArrayList<>();
+        for (int rate : ratings) {
+            solved.add(problemRatings.getOrDefault(rate, 0L));
+        }
+        return solved;
+    }
+
+    private CategoryChart createChart(String title, String seriesName, List<Integer> ratings, List<Long> solved) {
+        CategoryChart chart = new CategoryChartBuilder()
+                .width(1920)
+                .height(1080)
+                .title(title)
+                .xAxisTitle("Problem Rating")
+                .yAxisTitle("Number of Problems Solved")
+                .build();
+
+        chart.addSeries(seriesName, ratings, solved);
+
+        Font font = new Font("Arial", Font.PLAIN, 20);
+        chart.getStyler().setBaseFont(font);
+        chart.getStyler().setLegendFont(font);
+        chart.getStyler().setAxisTickLabelsFont(font);
+        chart.getStyler().setAxisTitleFont(font);
+        chart.getStyler().setChartButtonFont(font);
+        chart.getStyler().setChartTitleFont(font);
+
+        chart.getStyler().setLegendPosition(Styler.LegendPosition.InsideNE);
+        chart.getStyler().setStacked(false);
+        chart.getStyler().setLabelsVisible(true);
+        chart.getStyler().setLabelsFont(new Font("Arial", Font.BOLD, 20));
+        chart.getStyler().setLabelsFontColorAutomaticEnabled(false);
+        return chart;
+    }
+
+    private File saveChart(CategoryChart chart) throws IOException {
+        BitmapEncoder.saveBitmap(chart, "problem_ratings.png", BitmapEncoder.BitmapFormat.PNG);
+        return new File("problem_ratings.png");
     }
 }

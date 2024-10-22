@@ -10,6 +10,7 @@ contests, user standings, and more directly through Discord commands.
 - **User Information**: Retrieve and display information about a Codeforces user.
 - **Contest Information**: Get details about upcoming and finished contests.
 - **User Contest Standings**: Check the standing of a user in a specific contest.
+- **Compare Problem Ratings**: Get rating statistics of solved problems for a user or compare between two users.
 - **Contest Tournament**: Suggest a random contest of a specified type for users. The contest will be one that none of the given usernames have participated in before. When the contest is over, the bot will announce the winners.
 - **Health Check**: A simple HTTP server for health checks.
 
@@ -24,6 +25,8 @@ contests, user standings, and more directly through Discord commands.
     - `/standing username:<username> contest_id:<contestId>`: Get a user's standing in a specific contest.
     - `/random-problem ratingSart:<ratingStart> ratingEnd:<ratingEnd> [tags:<tag1,tag2,...>]`: Get a random problem from Codeforces, given rating and tags.
     - `/rating-history username:<username>`: Get the rating history graph of a user.
+    - `/problem-ratings username:<username>`: Get the rating statistics of solved problems for a user.
+    - `/compare-problem-ratings username1:<username1> username2:<username2>`: Compare the rating statistics of solved problems between two users.
     <!-- /random-contest usernames: _AhmedMohamed_, Shayan contest_type: div3 start_time: 2024-09-16 07:37:00 +03:00 -->
     - `/random-contest usernames:<username1>,<username2>,... contest_type:<contestType> [start_time:<startTime>]`: Suggest a random contest for a virtual tournament. Announce the winners when the contest is over.
 
@@ -53,6 +56,18 @@ https://github.com/AhmedMohamedAbdelaty/Codeforces-Discord-bot/assets/73834838/e
 
 
 https://github.com/AhmedMohamedAbdelaty/Codeforces-Discord-bot/assets/73834838/98cdc743-214a-430b-bcef-21448ecc36d7
+
+
+6. **Problem Rating Statistics**:
+
+    1. User problem rating statistics:
+    ![image](https://github.com/user-attachments/assets/681b2ad2-6c69-488e-bc15-fbeb8711098e)
+    ![image](https://github.com/user-attachments/assets/f6f3828f-ba1d-43dc-bd18-cb47cf5f0e5c)
+
+
+    2. Comparison between two users:
+    ![image](https://github.com/user-attachments/assets/c4fffbd2-725e-4f80-8d10-43e1c7900fbd)
+    ![image](https://github.com/user-attachments/assets/5e373b13-0907-4c92-b779-bbd1f1978715)
 
 6. **Contest Tournament**:
 
