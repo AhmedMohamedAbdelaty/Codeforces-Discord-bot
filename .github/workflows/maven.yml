@@ -11,10 +11,10 @@ jobs:
 
     steps:
     - name: Checkout repository
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4   
 
     - name: Set up JDK 21
-      uses: actions/setup-java@v3
+      uses: actions/setup-java@v4  
       with:
         java-version: '21'
         distribution: 'temurin'
@@ -27,14 +27,16 @@ jobs:
       run: mvn -B test
 
     - name: Upload JAR artifact
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4  
       with:
         name: Codeforces-Bot
         path: target/*-jar-with-dependencies.jar
+        retention-days: 5  # Optional: specify how long to keep the artifact
 
     - name: Publish Test Results
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4  
       if: always()
       with:
         name: test-results
         path: target/surefire-reports/
+        retention-days: 5  # Optional: specify how long to keep the artifact
