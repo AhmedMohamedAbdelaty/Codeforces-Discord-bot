@@ -49,9 +49,9 @@ We use Redis to cache API responses. This makes things faster and reduces unnece
 
 5. **User Contest Standings**:
 
-   User Contest Standings](https://github.com/AhmedMohamedAbdelaty/Codeforces-Discord-bot/assets/73834838/98cdc743-214a-430b-bcef-21448ecc36d7
+    https://github.com/AhmedMohamedAbdelaty/Codeforces-Discord-bot/assets/73834838/98cdc743-214a-430b-bcef-21448ecc36d7
 
-6. **Problem Rating Statistics**:
+7. **Problem Rating Statistics**:
     1. User problem rating statistics:
        ![User Problem Rating Statistics](https://github.com/user-attachments/assets/681b2ad2-6c69-488e-bc15-fbeb8711098e)
        ![User Problem Rating Statistics](https://github.com/user-attachments/assets/f6f3828f-ba1d-43dc-bd18-cb47cf5f0e5c)
@@ -60,7 +60,7 @@ We use Redis to cache API responses. This makes things faster and reduces unnece
        ![Comparison Between Two Users](https://github.com/user-attachments/assets/c4fffbd2-725e-4f80-8d10-43e1c7900fbd)
        ![Comparison Between Two Users](https://github.com/user-attachments/assets/5e373b13-0907-4c92-b779-bbd1f1978715)
 
-7. **Contest Tournament**:
+8. **Contest Tournament**:
    After the virtual contest ends, the bot will send the participants' ranks along with details like:
    - Number of solved problems
    - Number of wrong answers during the contest
