@@ -1,7 +1,4 @@
-# Hey there! Welcome to the Codeforces Bot for Discord! 🎉
-
-
-A super cool Discord bot that lets you interact with the Codeforces API. You can get info about contests, user standings, and more, all through fun Discord commands!
+An unofficial Discord bot that provides info about contests, user standings, and more.
 
 ## Features
 
